@@ -114,7 +114,7 @@ export default function Home() {
   return localStorage.getItem("darkMode") === "true"
   })
   const theme = {
-  page: darkMode ? "#111827" : "#f9fafb",
+  page: darkMode ? "#111827" : "#eef2f7",
   card: darkMode ? "#1f2937" : "#ffffff",
   softCard: darkMode ? "#374151" : "#f9fafb",
   text: darkMode ? "#f9fafb" : "#111827",
@@ -433,7 +433,7 @@ let daysData = []
 
 
   async function deleteMedia(mediaItem) {
-    if (!isAdmin) return
+    
 
     const confirmed = window.confirm("Supprimer cette image ?")
     if (!confirmed) return
@@ -721,14 +721,18 @@ let daysData = []
         </p>
       )}
 
-      <div
+      <div className="hide-scrollbar"
         style={{
           display: "flex",
-          gap: 8,
+          gap: "8px",
           overflowX: "auto",
-          marginBottom: 24,
-          paddingBottom: 4,
+          marginBottom: "24px",
           whiteSpace: "nowrap",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+        onWheel={(e) => {
+          e.currentTarget.scrollLeft += e.deltaY
         }}
       >
         {days.map((day) => (
@@ -1032,24 +1036,7 @@ let daysData = []
                 boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
               }}
             >
-              {hotelImage && (
-                <img
-                  src={hotelImage}
-                  alt=""
-                  onClick={() => {
-                    setGalleryImages([hotelImage])
-                    setGalleryIndex(0)
-                  }}
-                  style={{
-                    width: "100%",
-                    height: "130px",
-                    objectFit: "cover",
-                    borderRadius: "12px",
-                    marginBottom: "16px",
-                    cursor: "pointer",
-                  }}
-                />
-              )}
+
 
               <div
                 style={{
@@ -1118,7 +1105,7 @@ let daysData = []
                       padding: "10px 14px",
                       cursor: "pointer",
                       fontSize: "14px",
-                      fontWeight: "600",
+                      fontWeight: "400",
                     }}
                   >
                     {expandedItems[`hotel-${hotelOfDay.id}`]
@@ -1137,6 +1124,47 @@ let daysData = []
                       }}
                     >
                       {hotelOfDay.notes}
+
+                      {hotelMedia.length > 0 && (
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            flexWrap: "wrap",
+                            marginTop: "14px",
+                          }}
+                        >
+                          {hotelMedia.map((img) => {
+                            const imageUrl = getPublicImageUrl(img.image_path)
+
+                            return (
+                              <img
+                                key={img.id}
+                                src={imageUrl}
+                                alt=""
+                                onClick={() => {
+                                  setGalleryImages(
+                                    hotelMedia.map((m) =>
+                                      getPublicImageUrl(m.image_path)
+                                    )
+                                  )
+                                  setGalleryIndex(
+                                    hotelMedia.findIndex((m) => m.id === img.id)
+                                  )
+                                }}
+                                style={{
+                                  width: "90px",
+                                  height: "90px",
+                                  borderRadius: "12px",
+                                  border: `2px solid ${theme.border}`,
+                                  objectFit: "cover",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -1288,7 +1316,7 @@ let daysData = []
                           padding: "10px 14px",
                           cursor: "pointer",
                           fontSize: "14px",
-                          fontWeight: "600",
+                          fontWeight: "400",
                           color: theme.text,
                         }}
                       >
@@ -1298,7 +1326,7 @@ let daysData = []
                       </button>
                     )}
 
-                    {expandedItems[item.id] && item.notes && (
+                    {expandedItems[item.id] && (
                       <div
                         style={{
                           marginTop: "12px",
@@ -1309,58 +1337,57 @@ let daysData = []
                           color: theme.text,
                         }}
                       >
-                        {item.notes}
+                        {item.notes && (
+                          <div style={{ marginBottom: itemMedia.length ? "14px" : 0 }}>
+                            {item.notes}
+                          </div>
+                        )}
+
+                        {itemMedia.length > 0 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "8px",
+                              flexWrap: "wrap",
+                              marginTop: "12px",
+                            }}
+                          >
+                            {itemMedia.map((img) => {
+                              const imageUrl = getPublicImageUrl(img.image_path)
+
+                              return (
+                                <img
+                                  key={img.id}
+                                  src={imageUrl}
+                                  alt=""
+                                  onClick={() => {
+                                    setGalleryImages(
+                                      itemMedia.map((m) =>
+                                        getPublicImageUrl(m.image_path)
+                                      )
+                                    )
+
+                                    setGalleryIndex(
+                                      itemMedia.findIndex((m) => m.id === img.id)
+                                    )
+                                  }}
+                                  style={{
+                                    width: "90px",
+                                    height: "90px",
+                                    borderRadius: "12px",
+                                    border: `2px solid ${theme.border}`,
+                                    objectFit: "cover",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "8px",
-                        flexWrap: "wrap",
-                        marginTop: "12px",
-                      }}
-                    >
-                      {itemMedia.map((img) => {
-                        const imageUrl = getPublicImageUrl(img.image_path)
 
-                        return (
-                          <div
-                            key={img.id}
-                            style={{
-                              position: "relative",
-                            }}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt=""
-                              onClick={() => {
-                                setGalleryImages(
-                                  itemMedia.map((m) =>
-                                    getPublicImageUrl(m.image_path)
-                                  )
-                                )
-
-                                setGalleryIndex(
-                                  itemMedia.findIndex((m) => m.id === img.id)
-                                )
-                              }}
-                              style={{
-                                width: "90px",
-                                height: "90px",
-                                borderRadius: "12px",
-                                border: `2px solid ${theme.border}`,
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                                objectFit: "cover",
-                                cursor: "pointer",
-                              }}
-                            />
-
-
-                          </div>
-                        )
-                      })}
-                    </div>
 
                     
 
@@ -1383,7 +1410,7 @@ let daysData = []
                             minHeight: "48px",
                             borderRadius: "999px",
                             background: theme.button,
-                            color: "white",
+                            color: theme.text,
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
