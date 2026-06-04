@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
 import MediaUploader from "../components/MediaUploader"
 import { supabase } from "../lib/supabase"
 
 const jours = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"]
-const ADMIN_EMAIL = "ophelie.caquelin@gmail.com"
+
 const corsicanWords = [
   {
     corsican: "Bonghjornu",
@@ -59,7 +58,6 @@ const corsicanWords = [
 ]
 
 export default function Home() {
-  const navigate = useNavigate()
 
   // Données principales du voyage
   const [trip, setTrip] = useState(null)
@@ -70,7 +68,7 @@ export default function Home() {
   const [dictionaryOpen, setDictionaryOpen] = useState(false)
   const [dictionarySearch, setDictionarySearch] = useState("")
 
-  // Programme, médias et préparation
+  // Programme, médias
   const [programItems, setProgramItems] = useState([])
   const [allItems, setAllItems] = useState([])
   const [media, setMedia] = useState([])
@@ -79,19 +77,17 @@ export default function Home() {
   const [weather, setWeather] = useState(null)
   const [weatherLoading, setWeatherLoading] = useState(false)
 
-  // Session utilisateur et mode visiteur simulé
-  const [userEmail, setUserEmail] = useState("")
-  const [viewerMode, setViewerMode] = useState(false)
 
   // Interface
   const [expandedItems, setExpandedItems] = useState({})
   const [activePanel, setActivePanel] = useState(null)
-  const [fullscreenImage, setFullscreenImage] = useState(null)
-
+  const [galleryImages, setGalleryImages] = useState([])
+  const [galleryIndex, setGalleryIndex] = useState(0)
+  
   //flèche vers le haut
   const [showScrollTop, setShowScrollTop] = useState(false)
 
-  const isAdmin = userEmail === ADMIN_EMAIL && !viewerMode
+
 
   // Sépare le programme principal des plans optionnels.
   const mainItems = programItems.filter((item) => !item.is_optional)
@@ -132,7 +128,7 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (!selectedDay || selectedDay === "preparation") return
+    if (!selectedDay ) return
 
     loadProgramItems(selectedDay.id)
     loadMedia(selectedDay.id)
@@ -187,14 +183,8 @@ export default function Home() {
     }
   }
   async function init() {
-    const { data: auth } = await supabase.auth.getUser()
+    
 
-    if (!auth.user) {
-      navigate("/login")
-      return
-    }
-
-    setUserEmail(auth.user.email || "")
 
     await loadAllItems()
 
@@ -440,27 +430,7 @@ let daysData = []
     }))
   }
 
-  async function toggleBooked(item) {
-    if (!isAdmin) return
 
-    const { error } = await supabase
-      .from("program_items")
-      .update({
-        is_booked: !item.is_booked,
-      })
-      .eq("id", item.id)
-
-    if (error) {
-      console.error(error)
-      return
-    }
-
-    await loadAllItems()
-
-    if (selectedDay && selectedDay !== "preparation") {
-      await loadProgramItems(selectedDay.id)
-    }
-  }
 
   async function deleteMedia(mediaItem) {
     if (!isAdmin) return
@@ -507,7 +477,7 @@ let daysData = []
     ? getPublicImageUrl(hotelMedia[0].image_path)
     : null
   const bagItems =
-    selectedDay && selectedDay !== "preparation"
+    selectedDay 
       ? getChecklistItems(selectedDay.bag_checklist)
       : []
     return (
@@ -791,165 +761,12 @@ let daysData = []
           </button>
         ))}
 
-        <button
-          onClick={() => setSelectedDay("preparation")}
-          style={{
-            padding: "10px 16px",
-            borderRadius: "999px",
-            cursor: "pointer",
-            fontSize: 15,
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-            border:
-              selectedDay === "preparation"
-                ? "1px solid #2563eb"
-                : `1px solid ${theme.border}`,
-            background:
-              selectedDay === "preparation"
-                ? "#2563eb"
-                : theme.card,
-            color:
-              selectedDay === "preparation"
-                ? "#ffffff"
-                : theme.text,
-            boxShadow:
-              selectedDay === "preparation"
-                ? "0 6px 16px rgba(37,99,235,0.35)"
-                : "none",
-          }}
-        >
-          📋 Préparation
-        </button>
+
       </div>
 
-      {selectedDay === "preparation" && (
-        <div>
-          <h2
-            style={{
-              textAlign: "center",
-              marginBottom: "30px",
-            }}
-          >
-            📋 À réserver
-          </h2>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            {days.map((day) => {
-              const dayItems = allItems.filter(
-                (item) => item.day_id === day.id && !item.is_booked
-              )
 
-              if (dayItems.length === 0) return null
-
-              return (
-                <div
-                  key={day.id}
-                  style={{
-                    border: `1px solid ${theme.border}`,
-                    borderRadius: "12px",
-                    padding: "16px",
-                    background: theme.card,
-                  }}
-                >
-                  <h3 style={{ marginTop: 0 }}>Jour {day.day_number}</h3>
-
-                  <div
-                    style={{
-                      color: theme.muted,
-                      fontSize: "14px",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    {dayItems.length} réservation(s) à effectuer
-                  </div>
-
-                  {dayItems.map((item) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        padding: "8px 0",
-                        borderTop: "1px solid #f3f4f6",
-                      }}
-                    >
-                      <div style={{ fontWeight: "600" }}>
-                        {getCategoryIcon(item.category)} {item.title}
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: "20px",
-                          marginTop: "12px",
-                        }}
-                      >
-                        {isAdmin ? (
-                          <button
-                            onClick={() => toggleBooked(item)}
-                            style={{
-                              border: "none",
-                              background: "transparent",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              color: "#d97706",
-                            }}
-                          >
-                            ⚠ À réserver
-                          </button>
-                        ) : (
-                          <span
-                            style={{
-                              fontWeight: "bold",
-                              color: "#d97706",
-                            }}
-                          >
-                            ⚠ À réserver
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            })}
-          </div>
-
-          {userEmail === ADMIN_EMAIL && (
-            <div
-              style={{
-                marginTop: "40px",
-                textAlign: "center",
-                paddingTop: "20px",
-                borderTop: "1px solid #e5e7eb",
-              }}
-            >
-              <button
-                onClick={() => setViewerMode(!viewerMode)}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "999px",
-                  border: "1px solid #d1d5db",
-                  background: viewerMode ? "#f59e0b" : "#2563eb",
-                  color: "white",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                }}
-              >
-                {viewerMode ? "👀 Mode visiteur" : "👩 Mode admin"}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {selectedDay && selectedDay !== "preparation" && (
+      {selectedDay  && (
         <div>
           <h2
             style={{
@@ -1216,10 +1033,13 @@ let daysData = []
                 <img
                   src={hotelImage}
                   alt=""
-                  onClick={() => setFullscreenImage(hotelImage)}
+                  onClick={() => {
+                    setGalleryImages([hotelImage])
+                    setGalleryIndex(0)
+                  }}
                   style={{
                     width: "100%",
-                    height: "190px",
+                    height: "130px",
                     objectFit: "cover",
                     borderRadius: "12px",
                     marginBottom: "16px",
@@ -1247,15 +1067,23 @@ let daysData = []
                 {hotelOfDay.title}
 
                 {hotelOfDay.address && (
-                  <div
+                  <a
+                    href={getMapsHref(hotelOfDay.maps_url || hotelOfDay.address)}
+                    target="_blank"
+                    rel="noreferrer"
                     style={{
+                      display: "inline-block",
                       marginTop: "8px",
-                      color: theme.muted,
+                      color: "#2563eb",
                       fontSize: "15px",
+                      textDecoration: "none",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                      textDecoration: "underline",
                     }}
                   >
                     📍 {hotelOfDay.address}
-                  </div>
+                  </a>
                 )}
               </div>
 
@@ -1314,23 +1142,6 @@ let daysData = []
                   marginTop: "16px",
                 }}
               >
-                {hotelOfDay.maps_url && (
-                  <a
-                    href={getMapsHref(hotelOfDay.maps_url)}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: "12px 18px",
-                      background: "#2563eb",
-                      color: "white",
-                      borderRadius: "999px",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                    }}
-                  >
-                    📍 Itinéraire
-                  </a>
-                )}
 
                 {hotelOfDay.phone && (
                   <a
@@ -1374,10 +1185,6 @@ let daysData = []
                 (mediaItem) => mediaItem.program_item_id === item.id
               )
 
-              const firstImage = itemMedia.length
-                ? getPublicImageUrl(itemMedia[0].image_path)
-                : null
-
               return (
                 <div
                   key={item.id}
@@ -1389,37 +1196,7 @@ let daysData = []
                     marginBottom: "20px",
                   }}
                 >
-                  {firstImage && (
-                    <div style={{ position: "relative" }}>
-                      <img
-                        src={firstImage}
-                        alt=""
-                        onClick={() => setFullscreenImage(firstImage)}
-                        style={{
-                          width: "100%",
-                          height: "190px",
-                          objectFit: "cover",
-                          cursor: "pointer",
-                        }}
-                      />
-
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "12px",
-                          right: "12px",
-                          background: item.is_booked ? "#059669" : "#d97706",
-                          color: "white",
-                          padding: "6px 12px",
-                          borderRadius: "999px",
-                          fontWeight: "bold",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {item.is_booked ? "✓ Réservé" : "⚠ À réserver"}
-                      </div>
-                    </div>
-                  )}
+                  
 
                   <div style={{ padding: "16px" }}>
                     <div
@@ -1440,7 +1217,11 @@ let daysData = []
                           style={{
                             fontSize: "22px",
                             fontWeight: "700",
-                            lineHeight: 1.3,
+                            lineHeight: "1.45",
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word",
+                            width: "100%",
                           }}
                         >
                           {getCategoryIcon(item.category)} {item.title}
@@ -1454,30 +1235,10 @@ let daysData = []
                             textAlign: "left",
                           }}
                         >
-                          {isAdmin ? (
-                            <button
-                              onClick={() => toggleBooked(item)}
-                              style={{
-                                border: "none",
-                                background: "transparent",
-                                cursor: "pointer",
-                                padding: 0,
-                                fontSize: "14px",
-                                fontWeight: "bold",
-                                color: item.is_booked ? "#059669" : "#d97706",
-                              }}
-                            >
-                              {item.is_booked ? "✓ Réservé" : "⚠ À réserver"}
-                            </button>
-                          ) : (
-                            <span
-                              style={{
-                                color: item.is_booked ? "#059669" : "#d97706",
-                              }}
-                            >
-                              {item.is_booked ? "✓ Réservé" : "⚠ À réserver"}
-                            </span>
-                          )}
+                          
+                            {item.is_booked ? "✓ Réservé" : "⚠ À réserver"}
+                            
+                          
                         </div>
                       </div>
                     </div>
@@ -1565,48 +1326,35 @@ let daysData = []
                             <img
                               src={imageUrl}
                               alt=""
-                              onClick={() => setFullscreenImage(imageUrl)}
+                              onClick={() => {
+                                setGalleryImages(
+                                  itemMedia.map((m) =>
+                                    getPublicImageUrl(m.image_path)
+                                  )
+                                )
+
+                                setGalleryIndex(
+                                  itemMedia.findIndex((m) => m.id === img.id)
+                                )
+                              }}
                               style={{
-                                width: "140px",
-                                height: "100px",
+                                width: "90px",
+                                height: "90px",
+                                borderRadius: "12px",
+                                border: `2px solid ${theme.border}`,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
                                 objectFit: "cover",
-                                borderRadius: "8px",
                                 cursor: "pointer",
                               }}
                             />
 
-                            {isAdmin && (
-                              <button
-                                onClick={() => deleteMedia(img)}
-                                style={{
-                                  position: "absolute",
-                                  top: "-8px",
-                                  right: "-8px",
-                                  width: "28px",
-                                  height: "28px",
-                                  borderRadius: "50%",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  background: "#dc2626",
-                                  color: "white",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                ×
-                              </button>
-                            )}
+
                           </div>
                         )
                       })}
                     </div>
 
-                    {isAdmin && (
-                      <MediaUploader
-                        dayId={selectedDay.id}
-                        programItemId={item.id}
-                        onUploadSuccess={() => loadMedia(selectedDay.id)}
-                      />
-                    )}
+                    
 
                     <div
                       style={{
@@ -1626,7 +1374,7 @@ let daysData = []
                             flex: 1,
                             minHeight: "48px",
                             borderRadius: "999px",
-                            background: "#2563eb",
+                            background: theme.button,
                             color: "white",
                             display: "flex",
                             justifyContent: "center",
@@ -1685,51 +1433,142 @@ let daysData = []
         </div>
       )}
 
-      {fullscreenImage && (
-        <div
-          onClick={() => setFullscreenImage(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.95)",
-            zIndex: 9999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "20px",
-          }}
-        >
-          <button
-            onClick={() => setFullscreenImage(null)}
+      {galleryImages.length > 0 && (
+          <div
+            onClick={() => {
+              setGalleryImages([])
+              setGalleryIndex(0)
+            }}
             style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              width: "48px",
-              height: "48px",
-              borderRadius: "999px",
-              border: "none",
-              background: "rgba(255,255,255,0.2)",
-              color: "white",
-              fontSize: "24px",
-              cursor: "pointer",
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.95)",
+              zIndex: 9999,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "20px",
             }}
           >
-            ×
-          </button>
+            {/* Bouton fermer */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setGalleryImages([])
+                setGalleryIndex(0)
+              }}
+              style={{
+                position: "absolute",
+                top: "20px",
+                right: "20px",
+                width: "48px",
+                height: "48px",
+                borderRadius: "999px",
+                border: "none",
+                background: "rgba(255,255,255,0.2)",
+                color: "white",
+                fontSize: "24px",
+                cursor: "pointer",
+              }}
+            >
+              ×
+            </button>
 
-          <img
-            src={fullscreenImage}
-            alt=""
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              objectFit: "contain",
-              borderRadius: "12px",
-            }}
-          />
-        </div>
+            {/* Flèche gauche */}
+            {galleryImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+
+                  setGalleryIndex((prev) =>
+                    prev === 0
+                      ? galleryImages.length - 1
+                      : prev - 1
+                  )
+                }}
+                style={{
+                  position: "absolute",
+                  left: "20px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "999px",
+                  border: "none",
+                  background: "rgba(255,255,255,0.2)",
+                  color: "white",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                }}
+              >
+                ◀
+              </button>
+            )}
+
+            {/* Image */}
+            <img
+              src={galleryImages[galleryIndex]}
+              alt=""
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+                borderRadius: "12px",
+              }}
+            />
+
+            {/* Compteur */}
+            {galleryImages.length > 1 && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "20px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  color: "white",
+                  fontWeight: "600",
+                  background: "rgba(0,0,0,0.4)",
+                  padding: "8px 14px",
+                  borderRadius: "999px",
+                }}
+              >
+                {galleryIndex + 1} / {galleryImages.length}
+              </div>
+            )}
+
+            {/* Flèche droite */}
+            {galleryImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+
+                  setGalleryIndex((prev) =>
+                    prev === galleryImages.length - 1
+                      ? 0
+                      : prev + 1
+                  )
+                }}
+                style={{
+                  position: "absolute",
+                  right: "20px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "999px",
+                  border: "none",
+                  background: "rgba(255,255,255,0.2)",
+                  color: "white",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                }}
+              >
+                ▶
+              </button>
+            )}
+          </div>
+
       )}
               {!isOnline && (
       <div
