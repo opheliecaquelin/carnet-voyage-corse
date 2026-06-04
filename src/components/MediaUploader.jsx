@@ -1,5 +1,54 @@
 import { supabase } from "../lib/supabase"
+function compressImage(file, maxWidth = 1600, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    const reader = new FileReader()
 
+    reader.onload = () => {
+      image.src = reader.result
+    }
+
+    reader.onerror = reject
+
+    image.onload = () => {
+      const scale = Math.min(1, maxWidth / image.width)
+      const width = Math.round(image.width * scale)
+      const height = Math.round(image.height * scale)
+
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+
+      const context = canvas.getContext("2d")
+      context.drawImage(image, 0, 0, width, height)
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Compression impossible"))
+            return
+          }
+
+          const compressedFile = new File(
+            [blob],
+            file.name.replace(/\.[^.]+$/, ".jpg"),
+            {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            }
+          )
+
+          resolve(compressedFile)
+        },
+        "image/jpeg",
+        quality
+      )
+    }
+
+    image.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 export default function MediaUploader({
   dayId,
   programItemId,
@@ -23,16 +72,21 @@ export default function MediaUploader({
 
     if (!file) return
 
-    const fileName =
-      Date.now() + "-" + file.name
+    const compressedFile = await compressImage(file)
 
-    const filePath =
-      `${dayId}/${fileName}`
+    const safeName = file.name
+      .replace(/\.[^.]+$/, ".jpg")
+      .replace(/[^a-zA-Z0-9._-]/g, "-")
+
+    const fileName = `${Date.now()}-${safeName}`
+    const filePath = `${dayId}/${fileName}`
 
     const { error: uploadError } =
       await supabase.storage
         .from("voyage-images")
-        .upload(filePath, file)
+        .upload(filePath, compressedFile, {
+          contentType: "image/jpeg",
+        })
 
     if (uploadError) {
         console.error("UPLOAD ERROR", uploadError)

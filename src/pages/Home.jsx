@@ -5,6 +5,58 @@ import { supabase } from "../lib/supabase"
 
 const jours = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"]
 const ADMIN_EMAIL = "ophelie.caquelin@gmail.com"
+const corsicanWords = [
+  {
+    corsican: "Bonghjornu",
+    french: "Bonjour",
+    note: "Salutation courante en journée.",
+  },
+  {
+    corsican: "Bona sera",
+    french: "Bonsoir",
+    note: "À utiliser en fin de journée.",
+  },
+  {
+    corsican: "À ringrazià vi",
+    french: "Merci",
+    note: "Forme polie pour remercier.",
+  },
+  {
+    corsican: "Per piacè",
+    french: "S'il vous plaît",
+    note: "Très utile au restaurant ou à l'hôtel.",
+  },
+  {
+    corsican: "Iè",
+    french: "Oui",
+    note: "Se prononce comme 'yé'.",
+  },
+  {
+    corsican: "Innò",
+    french: "Non",
+    note: "Simple et pratique.",
+  },
+  {
+    corsican: "Induve hè... ?",
+    french: "Où est... ?",
+    note: "Pour demander son chemin.",
+  },
+  {
+    corsican: "Quantu costa ?",
+    french: "Combien ça coûte ?",
+    note: "Utile dans les marchés et boutiques.",
+  },
+  {
+    corsican: "Salute",
+    french: "Santé / Salut",
+    note: "Pour trinquer ou saluer familièrement.",
+  },
+  {
+    corsican: "À prestu",
+    french: "À bientôt",
+    note: "Pour prendre congé.",
+  },
+]
 
 export default function Home() {
   const navigate = useNavigate()
@@ -13,6 +65,10 @@ export default function Home() {
   const [trip, setTrip] = useState(null)
   const [days, setDays] = useState([])
   const [selectedDay, setSelectedDay] = useState(null)
+
+  //dico
+  const [dictionaryOpen, setDictionaryOpen] = useState(false)
+  const [dictionarySearch, setDictionarySearch] = useState("")
 
   // Programme, médias et préparation
   const [programItems, setProgramItems] = useState([])
@@ -32,11 +88,44 @@ export default function Home() {
   const [activePanel, setActivePanel] = useState(null)
   const [fullscreenImage, setFullscreenImage] = useState(null)
 
+  //flèche vers le haut
+  const [showScrollTop, setShowScrollTop] = useState(false)
+
   const isAdmin = userEmail === ADMIN_EMAIL && !viewerMode
 
   // Sépare le programme principal des plans optionnels.
   const mainItems = programItems.filter((item) => !item.is_optional)
   const optionalItems = programItems.filter((item) => item.is_optional)
+
+  // hors ligne
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+
+  //dico
+  const filteredCorsicanWords = corsicanWords.filter((word) => {
+    const search = dictionarySearch.toLowerCase().trim()
+
+    if (!search) return true
+
+    return (
+      word.corsican.toLowerCase().includes(search) ||
+      word.french.toLowerCase().includes(search) ||
+      word.note.toLowerCase().includes(search)
+    )
+  })
+
+  //mode sombre
+  const [darkMode, setDarkMode] = useState(() => {
+  return localStorage.getItem("darkMode") === "true"
+  })
+  const theme = {
+  page: darkMode ? "#111827" : "#f9fafb",
+  card: darkMode ? "#1f2937" : "#ffffff",
+  softCard: darkMode ? "#374151" : "#f9fafb",
+  text: darkMode ? "#f9fafb" : "#111827",
+  muted: darkMode ? "#d1d5db" : "#6b7280",
+  border: darkMode ? "#374151" : "#e5e7eb",
+  button: darkMode ? "#374151" : "#e5e7eb",
+}
 
   useEffect(() => {
     init()
@@ -49,6 +138,39 @@ export default function Home() {
     loadMedia(selectedDay.id)
     loadWeather(selectedDay.weather_location, selectedDay.day_date)
   }, [selectedDay])
+  // hors ligne
+  useEffect(() => {
+    function updateOnlineStatus() {
+      setIsOnline(navigator.onLine)
+    }
+
+    window.addEventListener("online", updateOnlineStatus)
+    window.addEventListener("offline", updateOnlineStatus)
+
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus)
+      window.removeEventListener("offline", updateOnlineStatus)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode ? "true" : "false")
+
+    document.body.style.background = darkMode ? "#111827" : "#f9fafb"
+    document.body.style.color = darkMode ? "#f9fafb" : "#111827"
+  }, [darkMode])
+  useEffect(() => {
+    function handleScroll() {
+      setShowScrollTop(window.scrollY > 500)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    handleScroll()
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
 
   async function init() {
     const { data: auth } = await supabase.auth.getUser()
@@ -173,7 +295,17 @@ export default function Home() {
       setWeatherLoading(false)
     }
   }
+  function getChecklistItems(text) {
+    if (!text) return []
 
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        return line.replace(/^[-•*☐✅\s]+/, "")
+      })
+  }
   function getDefaultDay(daysData) {
     const today = new Date()
     const start = new Date("2026-06-13")
@@ -324,7 +456,12 @@ export default function Home() {
 
     loadMedia(selectedDay.id)
   }
-
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
   const hotelOfDay = programItems.find((item) => item.category === "hotel")
 
   const hotelMedia = hotelOfDay
@@ -334,14 +471,226 @@ export default function Home() {
   const hotelImage = hotelMedia.length
     ? getPublicImageUrl(hotelMedia[0].image_path)
     : null
+  const bagItems =
+    selectedDay && selectedDay !== "preparation"
+      ? getChecklistItems(selectedDay.bag_checklist)
+      : []
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          padding: 20,
+          background: theme.page,
+          color: theme.text,
+          transition: "background 0.2s ease, color 0.2s ease",
+        }}
+      >
+        <button
+        onClick={() => setDarkMode(!darkMode)}
+        style={{
+          position: "fixed",
+          right: "18px",
+          bottom: "18px",
+          zIndex: 1000,
+          width: "52px",
+          height: "52px",
+          borderRadius: "999px",
+          border: `1px solid ${theme.border}`,
+          background: theme.card,
+          color: theme.text,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          cursor: "pointer",
+          fontSize: "22px",
+        }}
+        aria-label={darkMode ? "Activer le mode clair" : "Activer le mode sombre"}
+      >
+        {darkMode ? "☀️" : "🌙"}
+      </button>
+          {showScrollTop && (
+      <button
+        onClick={scrollToTop}
+        style={{
+          position: "fixed",
+          left: "18px",
+          bottom: "18px",
+          zIndex: 1000,
+          width: "52px",
+          height: "52px",
+          borderRadius: "999px",
+          border: `1px solid ${theme.border}`,
+          background: theme.card,
+          color: theme.text,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          cursor: "pointer",
+          fontSize: "24px",
+        }}
+        aria-label="Retour en haut"
+      >
+        ↑
+      </button>
+    )}
+      <button
+        onClick={() => setDictionaryOpen(!dictionaryOpen)}
+        style={{
+          position: "fixed",
+          right: "18px",
+          bottom: "82px",
+          zIndex: 1000,
+          width: "52px",
+          height: "52px",
+          borderRadius: "999px",
+          border: `1px solid ${theme.border}`,
+          background: theme.card,
+          color: theme.text,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          cursor: "pointer",
+          fontSize: "22px",
+        }}
+        aria-label="Ouvrir le dictionnaire corse"
+      >
+        💬
+      </button>
 
-  return (
-    <div style={{ padding: 20 }}>
+      {dictionaryOpen && (
+        <div
+          style={{
+            position: "fixed",
+            right: "18px",
+            bottom: "146px",
+            zIndex: 1000,
+            width: "min(360px, calc(100vw - 36px))",
+            maxHeight: "60vh",
+            overflow: "auto",
+            borderRadius: "18px",
+            border: `1px solid ${theme.border}`,
+            background: theme.card,
+            color: theme.text,
+            boxShadow: "0 18px 48px rgba(0,0,0,0.28)",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "12px",
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                color: theme.text,
+              }}
+            >
+              💬 Dico corse
+            </h3>
+
+            <button
+              onClick={() => setDictionaryOpen(false)}
+              style={{
+                width: "34px",
+                height: "34px",
+                borderRadius: "999px",
+                border: "none",
+                background: theme.button,
+                color: theme.text,
+                cursor: "pointer",
+                fontSize: "18px",
+              }}
+              aria-label="Fermer le dictionnaire"
+            >
+              ×
+            </button>
+          </div>
+
+          <input
+            value={dictionarySearch}
+            onChange={(event) => setDictionarySearch(event.target.value)}
+            placeholder="Chercher un mot..."
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              marginBottom: "12px",
+              padding: "12px 14px",
+              borderRadius: "12px",
+              border: `1px solid ${theme.border}`,
+              background: darkMode ? "#111827" : "#ffffff",
+              color: theme.text,
+              fontSize: "16px",
+            }}
+          />
+
+          <div
+            style={{
+              display: "grid",
+              gap: "10px",
+            }}
+          >
+            {filteredCorsicanWords.map((word) => (
+              <div
+                key={word.corsican}
+                style={{
+                  padding: "12px",
+                  borderRadius: "14px",
+                  background: theme.softCard,
+                  border: `1px solid ${theme.border}`,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: "700",
+                    color: theme.text,
+                  }}
+                >
+                  {word.corsican}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "4px",
+                    fontWeight: "600",
+                    color: theme.muted,
+                  }}
+                >
+                  {word.french}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "6px",
+                    fontSize: "14px",
+                    color: theme.muted,
+                    lineHeight: "1.4",
+                  }}
+                >
+                  {word.note}
+                </div>
+              </div>
+            ))}
+
+            {filteredCorsicanWords.length === 0 && (
+              <div
+                style={{
+                  color: theme.muted,
+                  textAlign: "center",
+                  padding: "12px",
+                }}
+              >
+                Aucun mot trouvé
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <h1
         style={{
           fontSize: "36px",
           textAlign: "center",
           marginBottom: "30px",
+          color: "#f9fafb",
         }}
       >
         {trip?.name}
@@ -351,7 +700,7 @@ export default function Home() {
         <p
           style={{
             textAlign: "center",
-            color: "#6b7280",
+            color: theme.muted,
             marginTop: "-20px",
             marginBottom: "30px",
             fontSize: "18px",
@@ -446,17 +795,17 @@ export default function Home() {
                 <div
                   key={day.id}
                   style={{
-                    border: "1px solid #e5e7eb",
+                    border: `1px solid ${theme.border}`,
                     borderRadius: "12px",
                     padding: "16px",
-                    background: "white",
+                    background: theme.card,
                   }}
                 >
                   <h3 style={{ marginTop: 0 }}>Jour {day.day_number}</h3>
 
                   <div
                     style={{
-                      color: "#6b7280",
+                      color: theme.muted,
                       fontSize: "14px",
                       marginBottom: "12px",
                     }}
@@ -551,6 +900,7 @@ export default function Home() {
               textAlign: "center",
               fontSize: "42px",
               marginBottom: 8,
+              color: theme.text,
             }}
           >
             Jour {selectedDay.day_number}
@@ -559,7 +909,7 @@ export default function Home() {
           <p
             style={{
               textAlign: "center",
-              color: "#6b7280",
+              color: theme.muted,
               marginBottom: 32,
             }}
           >
@@ -576,11 +926,22 @@ export default function Home() {
               textAlign: "center",
               fontSize: "36px",
               marginBottom: "16px",
+              color: theme.text,
             }}
           >
             {selectedDay.title}
           </h1>
-
+          <h3
+            style={{
+              textAlign: "center",
+              color: theme.muted,
+              fontSize: "28px",
+              marginTop: 0,
+              marginBottom: 40,
+            }}
+          >
+            {selectedDay.subtitle}
+          </h3>
           <div
             style={{
               display: "flex",
@@ -621,8 +982,8 @@ export default function Home() {
                 border: "none",
                 cursor: "pointer",
                 fontWeight: "600",
-                background: activePanel === "bag" ? "#2563eb" : "#e5e7eb",
-                color: activePanel === "bag" ? "white" : "#374151",
+                background: activePanel === "bag" ? "#2563eb" : theme.button,
+                color: activePanel === "bag" ? "white" : theme.text,
                 transition: "all 0.15s ease",
               }}
             >
@@ -639,8 +1000,8 @@ export default function Home() {
                 border: "none",
                 cursor: "pointer",
                 fontWeight: "600",
-                background: activePanel === "planb" ? "#2563eb" : "#e5e7eb",
-                color: activePanel === "planb" ? "white" : "#374151",
+                background: activePanel === "planb" ? "#2563eb" : theme.button,
+                color: activePanel === "planb" ? "white" : theme.text,
                 transition: "all 0.15s ease",
               }}
             >
@@ -648,17 +1009,7 @@ export default function Home() {
             </button>
           </div>
 
-          <h3
-            style={{
-              textAlign: "center",
-              color: "#6b7280",
-              fontSize: "28px",
-              marginTop: 0,
-              marginBottom: 40,
-            }}
-          >
-            {selectedDay.subtitle}
-          </h3>
+
 
           {weatherLoading ? (
             <div
@@ -675,10 +1026,10 @@ export default function Home() {
                 maxWidth: "420px",
                 margin: "20px auto",
                 padding: "16px",
-                border: "1px solid #e5e7eb",
+                border: `1px solid ${theme.border}`,
                 borderRadius: "12px",
                 textAlign: "center",
-                background: "#f9fafb",
+                background: theme.softCard,
               }}
             >
               <div
@@ -706,30 +1057,63 @@ export default function Home() {
 
           
 
-          {activePanel === "bag" && selectedDay.bag_checklist && (
-            <div
+         {activePanel === "bag" && bagItems.length > 0 && (
+          <div
+            style={{
+              maxWidth: "700px",
+              margin: "20px auto",
+              background: darkMode ? "#1f2937" : "#fff8e1",
+              color: theme.text,
+              border: `1px solid ${theme.border}`,
+              borderRadius: "16px",
+              padding: "20px",
+            }}
+          >
+            <h3
               style={{
-                maxWidth: "700px",
-                margin: "20px auto",
-                background: "#fff8e1",
-                borderRadius: "16px",
-                padding: "20px",
+                marginTop: 0,
+                color: theme.text,
               }}
             >
-              <h3>🎒 Aujourd'hui dans le sac</h3>
+              🎒 Aujourd'hui dans le sac
+            </h3>
 
-              <div style={{ whiteSpace: "pre-line" }}>
-                {selectedDay.bag_checklist}
-              </div>
+            <div
+              style={{
+                display: "grid",
+                gap: "10px",
+              }}
+            >
+              {bagItems.map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    display: "flex",
+                    padding: "12px 14px",
+                    borderRadius: "14px",
+                    background: darkMode ? "#111827" : "#ffffff",
+                    border: `1px solid ${theme.border}`,
+                    color: theme.text,
+                    fontWeight: "600",
+                  }}
+                >
+
+
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
           {activePanel === "planb" && optionalItems.length > 0 && (
             <div
               style={{
                 maxWidth: "700px",
                 margin: "20px auto",
-                background: "#eef2ff",
+                background: darkMode ? "#1f2937" : "#fff8e1",
+                color: darkMode ? "#f9fafb" : "#111827",
+                border: `1px solid ${theme.border}`,
                 borderRadius: "16px",
                 padding: "20px",
               }}
@@ -761,7 +1145,7 @@ export default function Home() {
               style={{
                 maxWidth: "700px",
                 margin: "20px auto 40px auto",
-                background: "#ffffff",
+                background: theme.card,
                 borderRadius: "16px",
                 padding: "20px",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
@@ -805,7 +1189,7 @@ export default function Home() {
                   <div
                     style={{
                       marginTop: "8px",
-                      color: "#6b7280",
+                      color: theme.muted,
                       fontSize: "15px",
                     }}
                   >
@@ -818,7 +1202,7 @@ export default function Home() {
                 <div
                   style={{
                     marginTop: "8px",
-                    color: "#6b7280",
+                    color: theme.muted,
                   }}
                 >
                   🕒 {hotelOfDay.event_time}
@@ -851,7 +1235,7 @@ export default function Home() {
                         marginTop: "12px",
                         padding: "14px",
                         borderRadius: "12px",
-                        background: "#f9fafb",
+                        background: theme.softCard,
                         lineHeight: "1.6",
                       }}
                     >
@@ -904,13 +1288,17 @@ export default function Home() {
             </div>
           )}
 
-          <hr style={{ margin: "40px 0" }} />
-
-          <h2>🎯 Programme</h2>
+          <h2
+            style={{
+              color: theme.text,
+            }}
+          >
+            🎯 Programme
+          </h2>
 
           <p
             style={{
-              color: "#6b7280",
+              color: theme.muted,
               marginBottom: "20px",
             }}
           >
@@ -933,7 +1321,7 @@ export default function Home() {
                 <div
                   key={item.id}
                   style={{
-                    background: "#ffffff",
+                    background: theme.card,
                     borderRadius: "16px",
                     overflow: "hidden",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
@@ -1037,7 +1425,7 @@ export default function Home() {
                       <div
                         style={{
                           marginTop: "8px",
-                          color: "#6b7280",
+                          color: theme.muted,
                           fontSize: "15px",
                           fontWeight: "500",
                         }}
@@ -1050,7 +1438,7 @@ export default function Home() {
                       <div
                         style={{
                           marginTop: "12px",
-                          color: "#6b7280",
+                          color: theme.muted,
                           fontSize: "15px",
                           lineHeight: "1.5",
                         }}
@@ -1086,7 +1474,7 @@ export default function Home() {
                           marginTop: "12px",
                           padding: "14px",
                           borderRadius: "12px",
-                          background: "#f9fafb",
+                          background: theme.softCard,
                           lineHeight: "1.6",
                           color: "#374151",
                         }}
@@ -1282,6 +1670,26 @@ export default function Home() {
           />
         </div>
       )}
+              {!isOnline && (
+      <div
+        style={{
+          position: "fixed",
+          top: "12px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 1200,
+          padding: "10px 16px",
+          borderRadius: "999px",
+          background: "#f59e0b",
+          color: "white",
+          fontWeight: "700",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+        }}
+      >
+        Mode hors ligne
+      </div>
+    )}
     </div>
+
   )
 }
