@@ -1072,17 +1072,22 @@ let daysData = []
                     target="_blank"
                     rel="noreferrer"
                     style={{
-                      display: "inline-block",
-                      marginTop: "8px",
-                      color: "#2563eb",
-                      fontSize: "15px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginTop: "10px",
+                      padding: "12px 14px",
+                      borderRadius: "12px",
+                      background: theme.softCard,
+                      border: `1px solid ${theme.border}`,
+                      color: theme.text,
                       textDecoration: "none",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                      textDecoration: "underline",
+                      fontSize: "15px",
+                      lineHeight: "1.4",
                     }}
                   >
-                    📍 {hotelOfDay.address}
+                    <span style={{ fontSize: "18px" }}>📍</span>
+                    <span>{hotelOfDay.address}</span>
                   </a>
                 )}
               </div>
