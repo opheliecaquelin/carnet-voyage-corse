@@ -171,7 +171,21 @@ export default function Home() {
       window.removeEventListener("scroll", handleScroll)
     }
   }, [])
+  function saveOfflineData(key, value) {
+    localStorage.setItem(key, JSON.stringify(value))
+  }
 
+  function getOfflineData(key, fallback = null) {
+    const saved = localStorage.getItem(key)
+
+    if (!saved) return fallback
+
+    try {
+      return JSON.parse(saved)
+    } catch {
+      return fallback
+    }
+  }
   async function init() {
     const { data: auth } = await supabase.auth.getUser()
 
@@ -184,17 +198,32 @@ export default function Home() {
 
     await loadAllItems()
 
-    const { data: tripData } = await supabase.from("trip").select("*")
-    setTrip(tripData?.[0] || null)
+    try {
+      const { data: tripData } = await supabase.from("trip").select("*")
 
-    const { data: daysData } = await supabase
-      .from("days")
-      .select("*")
-      .order("day_number")
+      saveOfflineData("offline-trip", tripData?.[0] || null)
+      setTrip(tripData?.[0] || null)
+    } catch {
+      setTrip(getOfflineData("offline-trip", null))
+    }
 
-    setDays(daysData || [])
+let daysData = []
 
-    if (daysData?.length) {
+    try {
+      const result = await supabase
+        .from("days")
+        .select("*")
+        .order("day_number")
+
+      daysData = result.data || []
+      saveOfflineData("offline-days", daysData)
+    } catch {
+      daysData = getOfflineData("offline-days", [])
+    }
+
+    setDays(daysData)
+
+    if (daysData.length) {
       setSelectedDay(getDefaultDay(daysData))
     }
   }
@@ -214,9 +243,11 @@ export default function Home() {
 
     if (error) {
       console.error(error)
+      setAllItems(getOfflineData("offline-all-items", []))
       return
     }
 
+    saveOfflineData("offline-all-items", data || [])
     setAllItems(data || [])
   }
 
@@ -229,9 +260,11 @@ export default function Home() {
 
     if (error) {
       console.error(error)
+      setProgramItems(getOfflineData(`offline-program-${dayId}`, []))
       return
     }
 
+    saveOfflineData(`offline-program-${dayId}`, data || [])
     setProgramItems(data || [])
   }
 
@@ -243,9 +276,11 @@ export default function Home() {
 
     if (error) {
       console.error(error)
+      setMedia(getOfflineData(`offline-media-${dayId}`, []))
       return
     }
 
+    saveOfflineData(`offline-media-${dayId}`, data || [])
     setMedia(data || [])
   }
 
@@ -483,6 +518,9 @@ export default function Home() {
           background: theme.page,
           color: theme.text,
           transition: "background 0.2s ease, color 0.2s ease",
+          maxWidth: "760px",
+          margin: "0 auto",
+          paddingBottom: "96px",
         }}
       >
         <button
@@ -687,10 +725,10 @@ export default function Home() {
       )}
       <h1
         style={{
-          fontSize: "36px",
+          fontSize: "30px",
           textAlign: "center",
           marginBottom: "30px",
-          color: "#f9fafb",
+          color: theme.text,
         }}
       >
         {trip?.name}
@@ -726,18 +764,27 @@ export default function Home() {
             onClick={() => setSelectedDay(day)}
             style={{
               padding: "10px 16px",
-              borderRadius: 12,
+              borderRadius: "999px",
               cursor: "pointer",
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 700,
               whiteSpace: "nowrap",
               border:
                 selectedDay?.id === day.id
                   ? "1px solid #2563eb"
-                  : "1px solid #d1d5db",
+                  : `1px solid ${theme.border}`,
               background:
-                selectedDay?.id === day.id ? "#2563eb" : "#ffffff",
-              color: selectedDay?.id === day.id ? "#ffffff" : "#111827",
+                selectedDay?.id === day.id
+                  ? "#2563eb"
+                  : theme.card,
+              color:
+                selectedDay?.id === day.id
+                  ? "#ffffff"
+                  : theme.text,
+              boxShadow:
+                selectedDay?.id === day.id
+                  ? "0 6px 16px rgba(37,99,235,0.35)"
+                  : "none",
             }}
           >
             {label(day)}
@@ -748,18 +795,27 @@ export default function Home() {
           onClick={() => setSelectedDay("preparation")}
           style={{
             padding: "10px 16px",
-            borderRadius: 12,
+            borderRadius: "999px",
             cursor: "pointer",
             fontSize: 15,
-            fontWeight: 600,
+            fontWeight: 700,
             whiteSpace: "nowrap",
             border:
               selectedDay === "preparation"
                 ? "1px solid #2563eb"
-                : "1px solid #d1d5db",
+                : `1px solid ${theme.border}`,
             background:
-              selectedDay === "preparation" ? "#2563eb" : "#ffffff",
-            color: selectedDay === "preparation" ? "#ffffff" : "#111827",
+              selectedDay === "preparation"
+                ? "#2563eb"
+                : theme.card,
+            color:
+              selectedDay === "preparation"
+                ? "#ffffff"
+                : theme.text,
+            boxShadow:
+              selectedDay === "preparation"
+                ? "0 6px 16px rgba(37,99,235,0.35)"
+                : "none",
           }}
         >
           📋 Préparation
@@ -898,7 +954,7 @@ export default function Home() {
           <h2
             style={{
               textAlign: "center",
-              fontSize: "42px",
+              fontSize: "32px",
               marginBottom: 8,
               color: theme.text,
             }}
@@ -924,7 +980,7 @@ export default function Home() {
           <h1
             style={{
               textAlign: "center",
-              fontSize: "36px",
+              fontSize: "30px",
               marginBottom: "16px",
               color: theme.text,
             }}
@@ -935,7 +991,7 @@ export default function Home() {
             style={{
               textAlign: "center",
               color: theme.muted,
-              fontSize: "28px",
+              fontSize: "22px",
               marginTop: 0,
               marginBottom: 40,
             }}
@@ -951,26 +1007,26 @@ export default function Home() {
               marginBottom: "20px",
             }}
           >
-            {selectedDay.route_url && (
-              <a
-                href={getMapsHref(selectedDay.route_url)}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  padding: "12px 18px",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                  background: "#e5e7eb",
-                  color: "#374151",
-                  textDecoration: "none",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                🗺️ Itinéraire
-              </a>
-            )}
+          {selectedDay.route_url && (
+            <a
+              href={getMapsHref(selectedDay.route_url)}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                padding: "12px 18px",
+                borderRadius: "999px",
+                border: `1px solid ${theme.border}`,
+                cursor: "pointer",
+                fontWeight: "600",
+                background: theme.button,
+                color: theme.text,
+                textDecoration: "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              🗺️ Itinéraire
+            </a>
+          )}
 
             <button
               onClick={() =>
@@ -1011,47 +1067,52 @@ export default function Home() {
 
 
 
-          {weatherLoading ? (
+            {weatherLoading ? (
             <div
               style={{
-                textAlign: "center",
-                margin: "20px 0",
+                display: "flex",
+                justifyContent: "center",
+                margin: "12px 0 20px",
+                color: theme.muted,
+                fontSize: "14px",
               }}
             >
-              Chargement météo...
+              Météo...
             </div>
           ) : weather ? (
             <div
               style={{
-                maxWidth: "420px",
-                margin: "20px auto",
-                padding: "16px",
-                border: `1px solid ${theme.border}`,
-                borderRadius: "12px",
-                textAlign: "center",
-                background: theme.softCard,
+                display: "flex",
+                justifyContent: "center",
+                margin: "10px 0 22px",
               }}
             >
               <div
                 style={{
-                  fontWeight: "bold",
-                  marginBottom: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  maxWidth: "100%",
+                  padding: "9px 14px",
+                  borderRadius: "999px",
+                  border: `1px solid ${theme.border}`,
+                  background: theme.card,
+                  color: theme.text,
+                  boxShadow: darkMode
+                    ? "none"
+                    : "0 4px 14px rgba(15,23,42,0.06)",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  overflowX: "auto",
+                  whiteSpace: "nowrap",
                 }}
               >
-                ☀️ Météo prévue à {weather.location}
+                <span>☀️ {weather.location}</span>
+                <span>{weather.temperature}°C</span>
+                <span>{getWeatherLabel(weather.code)}</span>
+                <span>💨 {weather.wind} km/h</span>
+                <span>🌧️ {weather.rain}%</span>
               </div>
-
-              <div
-                style={{
-                  fontSize: "20px",
-                  marginBottom: "8px",
-                }}
-              >
-                {weather.temperature}°C • {getWeatherLabel(weather.code)}
-              </div>
-
-              <div>💨 Vent : {weather.wind} km/h</div>
-              <div>🌧️ Pluie : {weather.rain} %</div>
             </div>
           ) : null}
 
@@ -1158,7 +1219,7 @@ export default function Home() {
                   onClick={() => setFullscreenImage(hotelImage)}
                   style={{
                     width: "100%",
-                    height: "220px",
+                    height: "190px",
                     objectFit: "cover",
                     borderRadius: "12px",
                     marginBottom: "16px",
@@ -1216,7 +1277,7 @@ export default function Home() {
                     style={{
                       marginTop: "16px",
                       border: "none",
-                      background: "#f3f4f6",
+                      background: theme.button,
                       borderRadius: "12px",
                       padding: "10px 14px",
                       cursor: "pointer",
@@ -1336,7 +1397,7 @@ export default function Home() {
                         onClick={() => setFullscreenImage(firstImage)}
                         style={{
                           width: "100%",
-                          height: "220px",
+                          height: "190px",
                           objectFit: "cover",
                           cursor: "pointer",
                         }}
@@ -1453,13 +1514,13 @@ export default function Home() {
                         style={{
                           marginTop: "12px",
                           border: "none",
-                          background: "#f3f4f6",
+                          background: theme.button,
                           borderRadius: "12px",
                           padding: "10px 14px",
                           cursor: "pointer",
                           fontSize: "14px",
                           fontWeight: "600",
-                          color: "#374151",
+                          color: theme.text,
                         }}
                       >
                         {expandedItems[item.id]
@@ -1476,7 +1537,7 @@ export default function Home() {
                           borderRadius: "12px",
                           background: theme.softCard,
                           lineHeight: "1.6",
-                          color: "#374151",
+                          color: theme.text,
                         }}
                       >
                         {item.notes}
@@ -1574,7 +1635,7 @@ export default function Home() {
                             fontWeight: "600",
                           }}
                         >
-                          📍 Ouvrir l'itinéraire
+                          📍 Itinéraire
                         </a>
                       )}
 
@@ -1609,7 +1670,7 @@ export default function Home() {
                             justifyContent: "center",
                             alignItems: "center",
                             textDecoration: "none",
-                            background: "#f3f4f6",
+                            background: theme.button,
                           }}
                         >
                           🌐
