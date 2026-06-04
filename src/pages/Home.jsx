@@ -1085,7 +1085,7 @@ let daysData = []
                       color: theme.text,
                       textDecoration: "none",
                       fontSize: "15px",
-                      lineHeight: "1.4",
+                      lineHeight: "1.5",
                     }}
                   >
                     <span style={{ fontSize: "18px" }}>📍</span>
