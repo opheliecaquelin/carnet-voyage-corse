@@ -484,13 +484,16 @@ let daysData = []
       <div
         style={{
           minHeight: "100vh",
-          padding: 20,
           background: theme.page,
           color: theme.text,
           transition: "background 0.2s ease, color 0.2s ease",
           maxWidth: "760px",
           margin: "0 auto",
           paddingBottom: "96px",
+          maxWidth: "760px",
+          width: "100%",
+          boxSizing: "border-box",
+          padding: "16px",
         }}
       >
         <button
@@ -1065,7 +1068,6 @@ let daysData = []
                 }}
               >
                 {hotelOfDay.title}
-
                 {hotelOfDay.address && (
                   <a
                     href={getMapsHref(hotelOfDay.maps_url || hotelOfDay.address)}
@@ -1090,6 +1092,7 @@ let daysData = []
                     <span>{hotelOfDay.address}</span>
                   </a>
                 )}
+                
               </div>
 
               {hotelOfDay.event_time && (
