@@ -49,6 +49,7 @@ export default function InitAdmin() {
   
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
   const [message, setMessage] = useState("")
 
   const [trip, setTrip] = useState(null)
@@ -270,6 +271,8 @@ export default function InitAdmin() {
     setDayForm(day || emptyDay)
     setItemForm(emptyItem)
     setMediaForm(emptyMediaForm)
+    setEditingItemId(null)
+    setEditingAnecdoteId(null)
     setMessage("")
   }
 
@@ -278,6 +281,7 @@ export default function InitAdmin() {
     setDayForm(emptyDay)
     setProgramItems([])
     setMediaItems([])
+    setAnecdotes([])
     setItemForm(emptyItem)
     setMediaForm(emptyMediaForm)
     setMessage("")
@@ -425,7 +429,11 @@ export default function InitAdmin() {
     setItemForm(emptyItem)
     setEditingItemId(null)
     await loadProgramItems(selectedDayId)
-    setMessage("Élément ajouté au programme.")
+    setMessage(
+  editingItemId
+    ? "Élément modifié."
+    : "Élément ajouté au programme."
+)
   }
 
   async function deleteProgramItem(itemId) {
@@ -502,21 +510,17 @@ export default function InitAdmin() {
       reader.readAsDataURL(file)
     })
   }
+async function uploadFile(file) {
+  if (!file || !selectedDayId) {
+    setMessage("Sélectionne d'abord un jour.")
+    return
+  }
 
-  async function uploadMedia(event) {
-    const file = event.target.files?.[0]
-    event.target.value = ""
+  setSaving(true)
+  setMessage("")
 
-    if (!file || !selectedDayId) {
-      setMessage("Sélectionne d'abord un jour.")
-      return
-    }
-
-    setSaving(true)
-    setMessage("")
-
-    try {
-      const compressedFile = await compressImage(file)
+  try {
+     const compressedFile = await compressImage(file)
       const safeName = file.name
         .replace(/\.[^.]+$/, ".jpg")
         .replace(/[^a-zA-Z0-9._-]/g, "-")
@@ -560,6 +564,50 @@ export default function InitAdmin() {
     }
   }
 
+async function uploadMedia(event) {
+  const file = event.target.files?.[0]
+
+  if (!file) return
+
+  await uploadFile(file)
+
+  event.target.value = ""
+}
+async function handlePaste(event) {
+  const items = event.clipboardData?.items || []
+
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      const file = item.getAsFile()
+
+      if (file) {
+        await uploadFile(file)
+      }
+
+      break
+    }
+  }
+}
+  async function handleDrop(event) {
+  event.preventDefault()
+
+  setDragActive(false)
+
+  const file = event.dataTransfer.files?.[0]
+
+  if (file) {
+    await uploadFile(file)
+  }
+}
+  function handleDragOver(event) {
+  event.preventDefault()
+  setDragActive(true)
+}
+
+function handleDragLeave(event) {
+  event.preventDefault()
+  setDragActive(false)
+}
   async function deleteMedia(mediaItem) {
     const confirmed = window.confirm("Supprimer cette image ?")
     if (!confirmed) return
@@ -1018,16 +1066,57 @@ export default function InitAdmin() {
             />
           </div>
 
-          <label style={styles.uploadBox}>
-            {saving ? "Envoi en cours..." : "Choisir une photo ou capture"}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={uploadMedia}
-              disabled={saving}
-              style={{ display: "none" }}
-            />
-          </label>
+          <div
+  onPaste={handlePaste}
+  onDrop={handleDrop}
+  onDragOver={handleDragOver}
+  onDragLeave={handleDragLeave}
+  tabIndex={0}
+  style={{
+    ...styles.uploadBox,
+
+    background: dragActive
+      ? "#dbeafe"
+      : "#eff6ff",
+
+    borderColor: dragActive
+      ? "#2563eb"
+      : "#93c5fd",
+  }}
+>
+  <div>
+    📷 Déposez ou collez une image
+
+    <div
+      style={{
+        marginTop: "8px",
+        fontSize: "13px",
+        fontWeight: 500,
+      }}
+    >
+      ⌘+V ou glisser-déposer
+    </div>
+
+    <label
+      style={{
+        display: "block",
+        marginTop: "12px",
+      }}
+    >
+      <input
+        type="file"
+        accept="image/*"
+        onChange={uploadMedia}
+        style={{ display: "none" }}
+      />
+
+      <span style={styles.button}>
+        Choisir un fichier
+      </span>
+    </label>
+  </div>
+</div>
+
 
           {mediaItems.length > 0 && (
             <div style={styles.mediaGrid}>
