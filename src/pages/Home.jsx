@@ -3,7 +3,7 @@ import MediaUploader from "../components/MediaUploader"
 import { supabase } from "../lib/supabase"
 
 const jours = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"]
-const [touchStartX, setTouchStartX] = useState(null)
+
 
 const corsicanWords = [
   {
@@ -84,6 +84,7 @@ export default function Home() {
   const [activePanel, setActivePanel] = useState(null)
   const [galleryImages, setGalleryImages] = useState([])
   const [galleryIndex, setGalleryIndex] = useState(0)
+  const [touchStartX, setTouchStartX] = useState(null)
   
   //flèche vers le haut
   const [showScrollTop, setShowScrollTop] = useState(false)
@@ -1995,7 +1996,7 @@ let daysData = []
       )
     }
   }}
-              alt=""
+              
               onClick={(e) => e.stopPropagation()}
               style={{
                 maxWidth: "100%",
