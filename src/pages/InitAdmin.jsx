@@ -1355,7 +1355,7 @@ const styles = {
   dayTabs: {
     display: "flex",
     gap: 10,
-    overflowX: "auto",
+    flexWrap: "wrap",
     paddingBottom: 4,
     flexWrap: "wrap",
   },
