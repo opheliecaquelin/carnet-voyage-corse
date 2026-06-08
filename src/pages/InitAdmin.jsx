@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
+import { useRef } from "react"
 
 
 const emptyDay = {
@@ -60,6 +61,7 @@ export default function InitAdmin() {
   const [mediaForm, setMediaForm] = useState(emptyMediaForm)
   const [programItems, setProgramItems] = useState([])
   const [mediaItems, setMediaItems] = useState([])
+  const anecdoteFormRef = useRef(null)
   
   const [editingItemId, setEditingItemId] = useState(null)
   const [anecdotes, setAnecdotes] = useState([])
@@ -71,6 +73,7 @@ export default function InitAdmin() {
   })
   
   const [editingAnecdoteId, setEditingAnecdoteId] = useState(null)
+  const programFormRef = useRef(null)
  
   const selectedDay = days.find((day) => day.id === selectedDayId)
 
@@ -106,16 +109,18 @@ export default function InitAdmin() {
   function editAnecdote(anecdote) {
   setEditingAnecdoteId(anecdote.id)
 
+    
+
   setAnecdoteForm({
     title: anecdote.title || "",
     content: anecdote.content || "",
     sort_order: anecdote.sort_order || "",
   })
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  })
+  anecdoteFormRef.current?.scrollIntoView({
+  behavior: "smooth",
+  block: "start",
+})
 }
   async function saveAnecdote(event) {
   event.preventDefault()
@@ -369,10 +374,10 @@ export default function InitAdmin() {
       sort_order: item.sort_order || "",
     })
   
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    })
+   programFormRef.current?.scrollIntoView({
+  behavior: "smooth",
+  block: "start",
+})
   }
   async function addProgramItem(event) {
     event.preventDefault()
@@ -793,7 +798,11 @@ function handleDragLeave(event) {
         </button>
       </form>
 
-      <form onSubmit={addProgramItem} style={styles.panel}>
+      <form
+  ref={programFormRef}
+  onSubmit={addProgramItem}
+  style={styles.panel}
+>
         <h2 style={styles.panelTitle}>Ajouter au programme</h2>
 
         {!selectedDayId && (
@@ -1294,8 +1303,9 @@ adminLayout: {
     height: "fit-content",
   top: "20px",
 },
-  adminContent: {
-  display: "grid",
+adminContent: {
+  display: "flex",
+  flexDirection: "column",
   gap: "24px",
 },
   daysList: {
