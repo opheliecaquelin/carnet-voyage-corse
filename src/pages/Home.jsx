@@ -1616,47 +1616,45 @@ let daysData = []
           </div>
 
       )}
-        {restaurantItems.length > 0 && (
-  <>
+       {restaurantItems.length > 0 && (
+  <div
+    style={{
+      marginTop: "40px",
+    }}
+  >
     <h2
       style={{
         color: theme.text,
-        marginTop: "40px",
+        marginBottom: "12px",
       }}
     >
       🍴 Restaurants
     </h2>
 
-    <p
+    <div
       style={{
-        color: theme.muted,
-        marginBottom: "20px",
+        background: theme.card,
+        borderRadius: "16px",
+        overflow: "hidden",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
       }}
     >
-      {restaurantItems.length} restaurant(s)
-    </p>
-
-    {restaurantItems.map((item) => {
-      const itemMedia = media.filter(
-        (mediaItem) => mediaItem.program_item_id === item.id
-      )
-
-      return (
+      {restaurantItems.map((item, index) => (
         <div
           key={item.id}
           style={{
-            background: theme.card,
-            borderRadius: "16px",
-            overflow: "hidden",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-            marginBottom: "20px",
             padding: "16px",
+            borderBottom:
+              index < restaurantItems.length - 1
+                ? `1px solid ${theme.border}`
+                : "none",
           }}
         >
           <div
             style={{
-              fontSize: "22px",
               fontWeight: "700",
+              fontSize: "18px",
+              color: theme.text,
             }}
           >
             🍴 {item.title}
@@ -1665,8 +1663,9 @@ let daysData = []
           {item.event_time && (
             <div
               style={{
-                marginTop: "8px",
+                marginTop: "4px",
                 color: theme.muted,
+                fontSize: "14px",
               }}
             >
               🕒 {item.event_time}
@@ -1676,46 +1675,74 @@ let daysData = []
           {item.address && (
             <div
               style={{
-                marginTop: "8px",
+                marginTop: "4px",
                 color: theme.muted,
+                fontSize: "14px",
               }}
             >
               📍 {item.address}
             </div>
           )}
 
-          {item.notes && (
-            <div
-              style={{
-                marginTop: "12px",
-              }}
-            >
-              {item.notes}
-            </div>
-          )}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              marginTop: "10px",
+            }}
+          >
+            {item.maps_url && (
+              <a
+                href={getMapsHref(item.maps_url)}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "999px",
+                  background: theme.button,
+                  color: theme.text,
+                  textDecoration: "none",
+                  fontSize: "14px",
+                }}
+              >
+                📍 Itinéraire
+              </a>
+            )}
 
-          {item.maps_url && (
-            <a
-              href={getMapsHref(item.maps_url)}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                marginTop: "12px",
-                display: "inline-flex",
-                padding: "10px 14px",
-                borderRadius: "999px",
-                background: theme.button,
-                color: theme.text,
-                textDecoration: "none",
-              }}
-            >
-              📍 Itinéraire
-            </a>
-          )}
+            {item.phone && (
+              <a
+                href={`tel:${item.phone}`}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "999px",
+                  background: "#ecfdf5",
+                  textDecoration: "none",
+                }}
+              >
+                📞
+              </a>
+            )}
+
+            {item.website && (
+              <a
+                href={item.website}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "999px",
+                  background: theme.button,
+                  textDecoration: "none",
+                }}
+              >
+                🌐
+              </a>
+            )}
+          </div>
         </div>
-      )
-    })}
-  </>
+      ))}
+    </div>
+  </div>
 )}
               {!isOnline && (
       <div
