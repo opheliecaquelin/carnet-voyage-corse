@@ -907,6 +907,17 @@ const todayDay =
           >
             {selectedDay.subtitle}
           </h3>
+                    {selectedDay.summary && (
+            <p
+              style={{
+                textAlign: "center",
+                maxWidth: "900px",
+                margin: "0 auto 40px auto",
+              }}
+            >
+              {selectedDay.summary}
+            </p>
+          )}
           <div
             style={{
               display: "flex",
@@ -1098,17 +1109,7 @@ const todayDay =
             </div>
           )}
 
-          {selectedDay.summary && (
-            <p
-              style={{
-                textAlign: "center",
-                maxWidth: "900px",
-                margin: "0 auto 40px auto",
-              }}
-            >
-              {selectedDay.summary}
-            </p>
-          )}
+
 
    
           {anecdotes.length > 0 && (
