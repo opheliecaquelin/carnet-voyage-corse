@@ -1416,18 +1416,32 @@ let daysData = []
                         </div>
 
                         <div
-                          style={{
-                            marginTop: "6px",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            textAlign: "left",
-                          }}
-                        >
-                          
-                            {item.is_booked ? "✓ Réservé" : "⚠ À réserver"}
-                            
-                          
-                        </div>
+  style={{
+    marginTop: "10px",
+  }}
+>
+  <span
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px",
+      padding: "6px 12px",
+      borderRadius: "999px",
+      fontSize: "13px",
+      fontWeight: "600",
+
+      background: item.is_booked
+        ? (darkMode ? "#064e3b" : "#dcfce7")
+        : (darkMode ? "#78350f" : "#fef3c7"),
+
+      color: item.is_booked
+        ? (darkMode ? "#bbf7d0" : "#166534")
+        : (darkMode ? "#fde68a" : "#92400e"),
+    }}
+  >
+    {item.is_booked ? "✓ Réservé" : "⚠ À réserver"}
+  </span>
+</div>
                       </div>
                     </div>
 
