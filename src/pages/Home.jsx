@@ -95,6 +95,13 @@ export default function Home() {
       !item.is_optional &&
       item.category !== "hotel"
   )
+  const restaurantItems = mainItems.filter(
+    (item) => item.category === "restaurant"
+  )
+  
+  const activityItems = mainItems.filter(
+    (item) => item.category !== "restaurant"
+  )
   const optionalItems = programItems.filter((item) => item.is_optional)
 
   // hors ligne
@@ -1220,10 +1227,24 @@ let daysData = []
           {mainItems.length === 0 ? (
             <p>Aucune activité pour le moment</p>
           ) : (
-            mainItems.map((item) => {
+            activityItems.map(item) => {
               const itemMedia = media.filter(
                 (mediaItem) => mediaItem.program_item_id === item.id
               )
+            {restaurantItems.length > 0 && (
+                <>
+                  <h2
+                    style={{
+                      marginTop: "40px",
+                      color: theme.text,
+                    }}
+                  >
+                    🍴 Restaurants
+                  </h2>
+              
+                  {restaurantItems.map(...)}
+                </>
+              )}
 
               return (
                 <div
