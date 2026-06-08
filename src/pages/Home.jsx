@@ -3,6 +3,7 @@ import MediaUploader from "../components/MediaUploader"
 import { supabase } from "../lib/supabase"
 
 const jours = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"]
+const [touchStartX, setTouchStartX] = useState(null)
 
 const corsicanWords = [
   {
@@ -625,7 +626,7 @@ let daysData = []
         }}
         aria-label="Ouvrir le dictionnaire corse"
       >
-        💬
+        🗣️
       </button>
 
       {dictionaryOpen && (
@@ -661,7 +662,7 @@ let daysData = []
                 color: theme.text,
               }}
             >
-              💬 Dico corse
+              🗣️ Expressions corses
             </h3>
 
             <button
@@ -841,6 +842,96 @@ let daysData = []
 
       {selectedDay  && (
         <div>
+          <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  }}
+>
+  <button
+    onClick={() => {
+      const index = days.findIndex(
+        (d) => d.id === selectedDay.id
+      )
+
+      if (index > 0) {
+        setSelectedDay(days[index - 1])
+      }
+    }}
+    disabled={
+      days.findIndex((d) => d.id === selectedDay.id) === 0
+    }
+    style={{
+      padding: "10px 14px",
+      borderRadius: "999px",
+      border: "none",
+      background: theme.button,
+      color: theme.text,
+    }}
+  >
+    ◀
+  </button>
+
+  <div
+    style={{
+      fontWeight: "700",
+      color: theme.text,
+    }}
+  >
+    {selectedDay.day_number} / {days.length}
+  </div>
+
+  <button
+    onClick={() => {
+      const index = days.findIndex(
+        (d) => d.id === selectedDay.id
+      )
+
+      if (index < days.length - 1) {
+        setSelectedDay(days[index + 1])
+      }
+    }}
+    disabled={
+      days.findIndex((d) => d.id === selectedDay.id) ===
+      days.length - 1
+    }
+    style={{
+      padding: "10px 14px",
+      borderRadius: "999px",
+      border: "none",
+      background: theme.button,
+      color: theme.text,
+    }}
+  >
+    ▶
+  </button>
+</div>
+          <div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "20px",
+  }}
+>
+  <button
+    onClick={() =>
+      setSelectedDay(getDefaultDay(days))
+    }
+    style={{
+      padding: "10px 18px",
+      borderRadius: "999px",
+      border: "none",
+      background: "#2563eb",
+      color: "white",
+      fontWeight: "600",
+      cursor: "pointer",
+    }}
+  >
+    📅 Aujourd'hui
+  </button>
+</div>
           <h2
             style={{
               textAlign: "center",
@@ -1674,6 +1765,35 @@ let daysData = []
             }}
           >
             🍴 {item.title}
+            <div
+  style={{
+    marginTop: "8px",
+  }}
+>
+  <span
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px",
+      padding: "6px 12px",
+      borderRadius: "999px",
+      fontSize: "13px",
+      fontWeight: "600",
+
+      background: item.is_booked
+        ? (darkMode ? "#064e3b" : "#dcfce7")
+        : (darkMode ? "#78350f" : "#fef3c7"),
+
+      color: item.is_booked
+        ? (darkMode ? "#bbf7d0" : "#166534")
+        : (darkMode ? "#fde68a" : "#92400e"),
+    }}
+  >
+    {item.is_booked
+      ? "✓ Réservé"
+      : "⚠ À réserver"}
+  </span>
+</div>
           </div>
 
           {item.event_time && (
@@ -1837,7 +1957,44 @@ let daysData = []
 
             {/* Image */}
             <img
-              src={galleryImages[galleryIndex]}
+  src={galleryImages[galleryIndex]}
+  alt=""
+  onTouchStart={(e) => {
+    setTouchStartX(
+      e.touches[0].clientX
+    )
+  }}
+  onTouchEnd={(e) => {
+    if (touchStartX === null) return
+
+    const endX =
+      e.changedTouches[0].clientX
+
+    const delta =
+      touchStartX - endX
+
+    if (
+      delta > 50 &&
+      galleryImages.length > 1
+    ) {
+      setGalleryIndex((prev) =>
+        prev === galleryImages.length - 1
+          ? 0
+          : prev + 1
+      )
+    }
+
+    if (
+      delta < -50 &&
+      galleryImages.length > 1
+    ) {
+      setGalleryIndex((prev) =>
+        prev === 0
+          ? galleryImages.length - 1
+          : prev - 1
+      )
+    }
+  }}
               alt=""
               onClick={(e) => e.stopPropagation()}
               style={{
