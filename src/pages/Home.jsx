@@ -789,15 +789,22 @@ let daysData = []
         </p>
       )}
 
-      <div
+<div
   style={{
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "24px",
-    padding: "0 8px",
+    padding: "14px 16px",
+    borderRadius: "18px",
+    background: theme.card,
+    border: `1px solid ${theme.border}`,
+    boxShadow: darkMode
+      ? "none"
+      : "0 4px 14px rgba(15,23,42,0.06)",
   }}
 >
+
   {(() => {
     const currentIndex = days.findIndex(
       (d) => d.id === selectedDay?.id
@@ -831,16 +838,25 @@ const todayDay =
             fontWeight: "600",
           }}
         >
-          {prevDay ? `◀ ${label(prevDay)}` : ""}
+          {prevDay
+  ? `◀ ${label(prevDay)}${
+      todayDay?.id === prevDay.id ? " ⭐" : ""
+    }`
+  : ""}
         </button>
 
         <div
-          style={{
-            fontWeight: "700",
-            textAlign: "center",
-            color: theme.text,
-          }}
-        >
+  style={{
+    fontWeight: "700",
+    textAlign: "center",
+    color: theme.text,
+    padding: "8px 14px",
+    borderRadius: "999px",
+    background: darkMode
+      ? "#374151"
+      : "#eef2ff",
+  }}
+>
           {selectedDay ? label(selectedDay) : ""}
           {todayDay?.id === selectedDay?.id ? " ⭐" : ""}
         </div>
@@ -856,7 +872,11 @@ const todayDay =
             fontWeight: "600",
           }}
         >
-          {nextDay ? `${label(nextDay)} ▶` : ""}
+          {nextDay
+  ? `${label(nextDay)}${
+      todayDay?.id === nextDay.id ? " ⭐" : ""
+    } ▶`
+  : ""}
         </button>
       </>
     )
