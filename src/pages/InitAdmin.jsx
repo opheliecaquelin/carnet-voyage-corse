@@ -59,6 +59,8 @@ export default function InitAdmin() {
   const [mediaForm, setMediaForm] = useState(emptyMediaForm)
   const [programItems, setProgramItems] = useState([])
   const [mediaItems, setMediaItems] = useState([])
+  
+  const [editingItemId, setEditingItemId] = useState(null)
 
  
   const selectedDay = days.find((day) => day.id === selectedDayId)
@@ -230,7 +232,29 @@ export default function InitAdmin() {
     setDayForm(data)
     setMessage("Jour sauvegardé.")
   }
-
+  function editProgramItem(item) {
+    setEditingItemId(item.id)
+  
+    setItemForm({
+      category: item.category || "visite",
+      title: item.title || "",
+      event_time: item.event_time || "",
+      price: item.price || "",
+      phone: item.phone || "",
+      website: item.website || "",
+      address: item.address || "",
+      maps_url: item.maps_url || "",
+      notes: item.notes || "",
+      is_booked: item.is_booked || false,
+      is_optional: item.is_optional || false,
+      sort_order: item.sort_order || "",
+    })
+  
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+  }
   async function addProgramItem(event) {
     event.preventDefault()
 
@@ -663,13 +687,28 @@ export default function InitAdmin() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => deleteProgramItem(item.id)}
-                    style={styles.dangerButton}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                    }}
                   >
-                    Supprimer
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => editProgramItem(item)}
+                      style={styles.button}
+                    >
+                      Modifier
+                    </button>
+                  
+                    <button
+                      type="button"
+                      onClick={() => deleteProgramItem(item.id)}
+                      style={styles.dangerButton}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
