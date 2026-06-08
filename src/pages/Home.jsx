@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import MediaUploader from "../components/MediaUploader"
+//import MediaUploader from "../components/MediaUploader"
 import { supabase } from "../lib/supabase"
 
 const jours = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"]
