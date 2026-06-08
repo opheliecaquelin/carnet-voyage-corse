@@ -61,7 +61,15 @@ export default function InitAdmin() {
   const [mediaItems, setMediaItems] = useState([])
   
   const [editingItemId, setEditingItemId] = useState(null)
+  const [anecdotes, setAnecdotes] = useState([])
 
+  const [anecdoteForm, setAnecdoteForm] = useState({
+    title: "",
+    content: "",
+    sort_order: "",
+  })
+  
+  const [editingAnecdoteId, setEditingAnecdoteId] = useState(null)
  
   const selectedDay = days.find((day) => day.id === selectedDayId)
 
@@ -77,6 +85,7 @@ export default function InitAdmin() {
     }
 
     loadProgramItems(selectedDayId)
+    loadAnecdotes(selectedDayId)
     loadMediaItems(selectedDayId)
   }, [selectedDayId])
 
@@ -93,7 +102,99 @@ export default function InitAdmin() {
 
   setLoading(false)
 }
+  function editAnecdote(anecdote) {
+  setEditingAnecdoteId(anecdote.id)
 
+  setAnecdoteForm({
+    title: anecdote.title || "",
+    content: anecdote.content || "",
+    sort_order: anecdote.sort_order || "",
+  })
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  })
+}
+  async function saveAnecdote(event) {
+  event.preventDefault()
+
+  if (!selectedDayId) {
+    setMessage("Sélectionne un jour.")
+    return
+  }
+
+  const payload = {
+    day_id: selectedDayId,
+    title: anecdoteForm.title,
+    content: anecdoteForm.content,
+    sort_order:
+      anecdoteForm.sort_order === ""
+        ? 0
+        : Number(anecdoteForm.sort_order),
+  }
+
+  let error
+
+  if (editingAnecdoteId) {
+    const result = await supabase
+      .from("anecdotes")
+      .update(payload)
+      .eq("id", editingAnecdoteId)
+
+    error = result.error
+  } else {
+    const result = await supabase
+      .from("anecdotes")
+      .insert(payload)
+
+    error = result.error
+  }
+
+  if (error) {
+    console.error(error)
+    setMessage("Erreur sauvegarde anecdote.")
+    return
+  }
+
+  setAnecdoteForm({
+    title: "",
+    content: "",
+    sort_order: "",
+  })
+
+  setEditingAnecdoteId(null)
+
+  await loadAnecdotes(selectedDayId)
+
+  setMessage(
+    editingAnecdoteId
+      ? "Anecdote modifiée."
+      : "Anecdote ajoutée."
+  )
+}
+  async function deleteAnecdote(id) {
+  const confirmed = window.confirm(
+    "Supprimer cette anecdote ?"
+  )
+
+  if (!confirmed) return
+
+  const { error } = await supabase
+    .from("anecdotes")
+    .delete()
+    .eq("id", id)
+
+  if (error) {
+    console.error(error)
+    setMessage("Erreur suppression anecdote.")
+    return
+  }
+
+  await loadAnecdotes(selectedDayId)
+
+  setMessage("Anecdote supprimée.")
+}
   async function loadDays() {
     const { data, error } = await supabase
       .from("days")
@@ -124,7 +225,21 @@ export default function InitAdmin() {
 
     setProgramItems(data || [])
   }
-
+  async function loadAnecdotes(dayId) {
+    const { data, error } = await supabase
+      .from("anecdotes")
+      .select("*")
+      .eq("day_id", dayId)
+      .order("sort_order")
+  
+    if (error) {
+      console.error(error)
+      setMessage("Erreur chargement anecdotes.")
+      return
+    }
+  
+    setAnecdotes(data || [])
+  }
   async function loadMediaItems(dayId) {
     const { data, error } = await supabase
       .from("media")
@@ -754,7 +869,106 @@ export default function InitAdmin() {
           )}
         </section>
       )}
+      <section style={styles.panel}>
+  <h2 style={styles.panelTitle}>
+    💡 Anecdotes
+  </h2>
 
+  <form onSubmit={saveAnecdote}>
+    <Field
+      label="Titre"
+      value={anecdoteForm.title}
+      onChange={(value) =>
+        setAnecdoteForm((current) => ({
+          ...current,
+          title: value,
+        }))
+      }
+    />
+
+    <TextArea
+      label="Contenu"
+      value={anecdoteForm.content}
+      onChange={(value) =>
+        setAnecdoteForm((current) => ({
+          ...current,
+          content: value,
+        }))
+      }
+    />
+
+    <Field
+      label="Ordre"
+      type="number"
+      value={anecdoteForm.sort_order}
+      onChange={(value) =>
+        setAnecdoteForm((current) => ({
+          ...current,
+          sort_order: value,
+        }))
+      }
+    />
+
+    <button
+      type="submit"
+      style={styles.primaryButton}
+    >
+      {editingAnecdoteId
+        ? "Mettre à jour l'anecdote"
+        : "Ajouter l'anecdote"}
+    </button>
+  </form>
+
+  <div
+    style={{
+      marginTop: "20px",
+      display: "grid",
+      gap: "10px",
+    }}
+  >
+    {anecdotes.map((anecdote) => (
+      <div
+        key={anecdote.id}
+        style={styles.listItem}
+      >
+        <div>
+          <strong>{anecdote.title}</strong>
+
+          <div style={styles.meta}>
+            ordre {anecdote.sort_order}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() =>
+              editAnecdote(anecdote)
+            }
+            style={styles.button}
+          >
+            Modifier
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              deleteAnecdote(anecdote.id)
+            }
+            style={styles.dangerButton}
+          >
+            Supprimer
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
       {selectedDayId && (
         <section style={styles.panel}>
           <h2 style={styles.panelTitle}>Photos et captures</h2>
