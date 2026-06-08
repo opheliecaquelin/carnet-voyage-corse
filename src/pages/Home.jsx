@@ -812,7 +812,10 @@ let daysData = []
       currentIndex < days.length - 1
         ? days[currentIndex + 1]
         : null
-
+const todayDay =
+  days.length > 0
+    ? getDefaultDay(days)
+    : null
     const todayDay = getDefaultDay(days)
 
     return (
@@ -838,8 +841,8 @@ let daysData = []
             color: theme.text,
           }}
         >
-          {label(selectedDay)}
-          {todayDay?.id === selectedDay.id ? " ⭐" : ""}
+          {selectedDay ? label(selectedDay) : ""}
+          {todayDay?.id === selectedDay?.id ? " ⭐" : ""}
         </div>
 
         <button
