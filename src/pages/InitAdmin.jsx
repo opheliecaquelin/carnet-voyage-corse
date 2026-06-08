@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
-import { Navigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 
-const ADMIN_EMAIL = "ophelie.caquelin@gmail.com"
 
 const emptyDay = {
   day_number: "",
@@ -48,7 +46,7 @@ const categories = [
 ]
 
 export default function InitAdmin() {
-  const [userEmail, setUserEmail] = useState("")
+  
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
@@ -62,7 +60,7 @@ export default function InitAdmin() {
   const [programItems, setProgramItems] = useState([])
   const [mediaItems, setMediaItems] = useState([])
 
-  const isAdmin = userEmail === ADMIN_EMAIL
+ 
   const selectedDay = days.find((day) => day.id === selectedDayId)
 
   useEffect(() => {
@@ -81,23 +79,18 @@ export default function InitAdmin() {
   }, [selectedDayId])
 
   async function init() {
-    const { data: auth } = await supabase.auth.getUser()
-    const email = auth.user?.email || ""
+  const { data: tripData } = await supabase
+    .from("trip")
+    .select("*")
 
-    setUserEmail(email)
+  const currentTrip = tripData?.[0] || null
 
-    if (email !== ADMIN_EMAIL) {
-      setLoading(false)
-      return
-    }
+  setTrip(currentTrip)
 
-    const { data: tripData } = await supabase.from("trip").select("*")
-    const currentTrip = tripData?.[0] || null
+  await loadDays()
 
-    setTrip(currentTrip)
-    await loadDays()
-    setLoading(false)
-  }
+  setLoading(false)
+}
 
   async function loadDays() {
     const { data, error } = await supabase
@@ -445,9 +438,7 @@ export default function InitAdmin() {
     return <div style={styles.page}>Chargement...</div>
   }
 
-  if (!isAdmin) {
-    return <Navigate to="/" replace />
-  }
+
 
   return (
     <div style={styles.page}>
