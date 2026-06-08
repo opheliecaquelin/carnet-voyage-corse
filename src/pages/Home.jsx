@@ -90,7 +90,11 @@ export default function Home() {
 
 
   // Sépare le programme principal des plans optionnels.
-  const mainItems = programItems.filter((item) => !item.is_optional)
+  const mainItems = programItems.filter(
+    (item) =>
+      !item.is_optional &&
+      item.category !== "hotel"
+  )
   const optionalItems = programItems.filter((item) => item.is_optional)
 
   // hors ligne
