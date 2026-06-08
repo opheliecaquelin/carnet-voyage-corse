@@ -87,7 +87,9 @@ export default function Home() {
   //flèche vers le haut
   const [showScrollTop, setShowScrollTop] = useState(false)
 
-
+  //anecdotes
+  const [anecdotes, setAnecdotes] = useState([])
+  const [showAnecdotes, setShowAnecdotes] = useState(false)
 
   // Sépare le programme principal des plans optionnels.
   const mainItems = programItems.filter(
@@ -142,8 +144,12 @@ export default function Home() {
     if (!selectedDay ) return
 
     loadProgramItems(selectedDay.id)
+
+    setShowAnecdotes(false)
+    
     loadMedia(selectedDay.id)
     loadWeather(selectedDay.weather_location, selectedDay.day_date)
+    loadAnecdotes(selectedDay.id)
   }, [selectedDay])
   // hors ligne
   useEffect(() => {
@@ -193,6 +199,15 @@ export default function Home() {
       return fallback
     }
   }
+  async function loadAnecdotes(dayId) {
+  const { data } = await supabase
+    .from("anecdotes")
+    .select("*")
+    .eq("day_id", dayId)
+    .order("sort_order")
+
+  setAnecdotes(data || [])
+}
   async function init() {
     
 
@@ -1035,6 +1050,88 @@ let daysData = []
               {selectedDay.summary}
             </p>
           )}
+          {anecdotes.length > 0 && (
+  <div
+    style={{
+      maxWidth: "700px",
+      margin: "0 auto 40px auto",
+    }}
+  >
+    <button
+      onClick={() => setShowAnecdotes(!showAnecdotes)}
+      style={{
+        width: "100%",
+        border: "none",
+        cursor: "pointer",
+        borderRadius: "16px",
+        padding: "16px",
+        background: theme.card,
+        color: theme.text,
+        textAlign: "left",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        fontSize: "16px",
+        fontWeight: "600",
+      }}
+    >
+      💡 Le saviez-vous ? ({anecdotes.length})
+
+      <span style={{ float: "right" }}>
+        {showAnecdotes ? "▲" : "▼"}
+      </span>
+    </button>
+
+    {showAnecdotes && (
+      <div
+        style={{
+          marginTop: "12px",
+          background: theme.card,
+          borderRadius: "16px",
+          padding: "18px",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        {anecdotes.map((anecdote, index) => (
+          <div
+            key={anecdote.id}
+            style={{
+              paddingBottom:
+                index < anecdotes.length - 1
+                  ? "18px"
+                  : "0",
+              marginBottom:
+                index < anecdotes.length - 1
+                  ? "18px"
+                  : "0",
+              borderBottom:
+                index < anecdotes.length - 1
+                  ? `1px solid ${theme.border}`
+                  : "none",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "700",
+                marginBottom: "8px",
+                color: theme.text,
+              }}
+            >
+              💡 {anecdote.title}
+            </div>
+
+            <div
+              style={{
+                lineHeight: "1.7",
+                color: theme.muted,
+              }}
+            >
+              {anecdote.content}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
           {hotelOfDay && (
             <div
