@@ -7,8 +7,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/init-admin" element={<InitAdmin />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/admin" element={<InitAdmin />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   )
