@@ -1112,88 +1112,7 @@ const todayDay =
 
 
    
-          {anecdotes.length > 0 && (
-  <div
-    style={{
-      maxWidth: "700px",
-      margin: "0 auto 40px auto",
-    }}
-  >
-    <button
-      onClick={() => setShowAnecdotes(!showAnecdotes)}
-      style={{
-        width: "100%",
-        border: "none",
-        cursor: "pointer",
-        borderRadius: "16px",
-        padding: "16px",
-        background: theme.card,
-        color: theme.text,
-        textAlign: "left",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-        fontSize: "16px",
-        fontWeight: "600",
-      }}
-    >
-      💡 Le saviez-vous ? ({anecdotes.length})
-
-      <span style={{ float: "right" }}>
-        {showAnecdotes ? "▲" : "▼"}
-      </span>
-    </button>
-
-    {showAnecdotes && (
-      <div
-        style={{
-          marginTop: "12px",
-          background: theme.card,
-          borderRadius: "16px",
-          padding: "18px",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-        }}
-      >
-        {anecdotes.map((anecdote, index) => (
-          <div
-            key={anecdote.id}
-            style={{
-              paddingBottom:
-                index < anecdotes.length - 1
-                  ? "18px"
-                  : "0",
-              marginBottom:
-                index < anecdotes.length - 1
-                  ? "18px"
-                  : "0",
-              borderBottom:
-                index < anecdotes.length - 1
-                  ? `1px solid ${theme.border}`
-                  : "none",
-            }}
-          >
-            <div
-              style={{
-                fontWeight: "700",
-                marginBottom: "8px",
-                color: theme.text,
-              }}
-            >
-              💡 {anecdote.title}
-            </div>
-
-            <div
-              style={{
-                lineHeight: "1.7",
-                color: theme.muted,
-              }}
-            >
-              {anecdote.content}
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-)}
+         
 
           {hotelOfDay && (
             <div
@@ -1366,7 +1285,88 @@ const todayDay =
               </div>
             </div>
           )}
+ {anecdotes.length > 0 && (
+  <div
+    style={{
+      maxWidth: "700px",
+      margin: "0 auto 40px auto",
+    }}
+  >
+    <button
+      onClick={() => setShowAnecdotes(!showAnecdotes)}
+      style={{
+        width: "100%",
+        border: "none",
+        cursor: "pointer",
+        borderRadius: "16px",
+        padding: "16px",
+        background: theme.card,
+        color: theme.text,
+        textAlign: "left",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        fontSize: "16px",
+        fontWeight: "600",
+      }}
+    >
+      💡 Le saviez-vous ? ({anecdotes.length})
 
+      <span style={{ float: "right" }}>
+        {showAnecdotes ? "▲" : "▼"}
+      </span>
+    </button>
+
+    {showAnecdotes && (
+      <div
+        style={{
+          marginTop: "12px",
+          background: theme.card,
+          borderRadius: "16px",
+          padding: "18px",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        }}
+      >
+        {anecdotes.map((anecdote, index) => (
+          <div
+            key={anecdote.id}
+            style={{
+              paddingBottom:
+                index < anecdotes.length - 1
+                  ? "18px"
+                  : "0",
+              marginBottom:
+                index < anecdotes.length - 1
+                  ? "18px"
+                  : "0",
+              borderBottom:
+                index < anecdotes.length - 1
+                  ? `1px solid ${theme.border}`
+                  : "none",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "700",
+                marginBottom: "8px",
+                color: theme.text,
+              }}
+            >
+              💡 {anecdote.title}
+            </div>
+
+            <div
+              style={{
+                lineHeight: "1.7",
+                color: theme.muted,
+              }}
+            >
+              {anecdote.content}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
           <h2
             style={{
               color: theme.text,
