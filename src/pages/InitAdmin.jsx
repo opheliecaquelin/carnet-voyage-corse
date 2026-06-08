@@ -282,7 +282,22 @@ export default function InitAdmin() {
       sort_order: itemForm.sort_order === "" ? 0 : Number(itemForm.sort_order),
     }
 
-    const { error } = await supabase.from("program_items").insert(payload)
+    let error
+
+    if (editingItemId) {
+      const result = await supabase
+        .from("program_items")
+        .update(payload)
+        .eq("id", editingItemId)
+    
+      error = result.error
+    } else {
+      const result = await supabase
+        .from("program_items")
+        .insert(payload)
+    
+      error = result.error
+    }
 
     setSaving(false)
 
@@ -293,6 +308,7 @@ export default function InitAdmin() {
     }
 
     setItemForm(emptyItem)
+    setEditingItemId(null)
     await loadProgramItems(selectedDayId)
     setMessage("Élément ajouté au programme.")
   }
@@ -662,10 +678,33 @@ export default function InitAdmin() {
         <button
           type="submit"
           disabled={saving || !selectedDayId}
-          style={styles.primaryButton}
+          style={{
+            ...styles.primaryButton,
+            background: editingItemId
+              ? "#f59e0b"
+              : "#2563eb",
+          }}
         >
-          Ajouter l'élément
+          {editingItemId
+            ? "Mettre à jour l'élément"
+            : "Ajouter l'élément"}
         </button>
+        {editingItemId && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingItemId(null)
+              setItemForm(emptyItem)
+            }}
+            style={{
+              ...styles.button,
+              width: "100%",
+              marginTop: "10px",
+            }}
+          >
+            Annuler la modification
+          </button>
+        )}
       </form>
 
       {selectedDayId && (
