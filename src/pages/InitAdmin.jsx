@@ -705,8 +705,8 @@ function handleDragLeave(event) {
       </header>
 
       {message && <div style={styles.message}>{message}</div>}
-
-      <section style={styles.panel}>
+      <div style={styles.adminLayout}>
+      <section style={styles.daysSidebar}>
         <div style={styles.panelHeader}>
           <h2 style={styles.panelTitle}>Jours</h2>
           <button type="button" onClick={startNewDay} style={styles.button}>
@@ -714,7 +714,7 @@ function handleDragLeave(event) {
           </button>
         </div>
 
-        <div style={styles.dayTabs}>
+        <div style={styles.daysList}>
           {days.map((day) => (
             <button
               key={day.id}
@@ -730,8 +730,9 @@ function handleDragLeave(event) {
           ))}
         </div>
       </section>
+        <div style={styles.adminContent}>
 
-      <form onSubmit={saveDay} style={styles.panel}>
+<form onSubmit={saveDay} style={styles.panel}>
         <h2 style={styles.panelTitle}>
           {selectedDay ? `Modifier J${selectedDay.day_number}` : "Créer un jour"}
         </h2>
@@ -917,7 +918,7 @@ function handleDragLeave(event) {
       </form>
 
       {selectedDayId && (
-        <section style={styles.panel}>
+        <section style={styles.daysSidebar}>
           <h2 style={styles.panelTitle}>Programme déjà saisi</h2>
 
           {programItems.length === 0 ? (
@@ -1216,7 +1217,10 @@ function handleDragLeave(event) {
           )}
         </section>
       )}
+          </div>   {/* adminContent */}
+</div>   {/* adminLayout */}
     </div>
+      </div>
   )
 }
 
@@ -1275,6 +1279,30 @@ const styles = {
     margin: "6px 0 0",
     color: "#6b7280",
   },
+  adminLayout: {
+    display: "grid",
+    gridTemplateColumns: "320px 1fr",
+    gap: "24px",
+    alignItems: "start",
+  },
+  daysSidebar: {
+  background: "#fff",
+  borderRadius: "20px",
+  padding: "20px",
+  border: "1px solid #e5e7eb",
+  position: "sticky",
+    height: "fit-content",
+  top: "20px",
+},
+  adminContent: {
+  display: "grid",
+  gap: "24px",
+},
+  daysList: {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+},
   homeLink: {
     padding: "10px 14px",
     borderRadius: 999,
@@ -1284,15 +1312,13 @@ const styles = {
     fontWeight: 700,
     whiteSpace: "nowrap",
   },
-  panel: {
-    maxWidth: 980,
-    margin: "0 auto 18px",
-    padding: 18,
-    borderRadius: 16,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
-  },
+panel: {
+  padding: 18,
+  borderRadius: 16,
+  background: "white",
+  border: "1px solid #e5e7eb",
+  boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+},
   panelHeader: {
     display: "flex",
     justifyContent: "space-between",
@@ -1359,20 +1385,21 @@ const styles = {
     paddingBottom: 4,
     flexWrap: "wrap",
   },
-  dayTab: {
-    padding: "10px 16px",
-    borderRadius: 999,
-    border: "1px solid #d1d5db",
-    background: "white",
-    cursor: "pointer",
-    fontWeight: 800,
-    whiteSpace: "nowrap",
-  },
-  dayTabActive: {
-    background: "#2563eb",
-    color: "white",
-    borderColor: "#2563eb",
-  },
+dayTab: {
+  width: "100%",
+  textAlign: "left",
+  padding: "12px 16px",
+  borderRadius: "12px",
+  border: "1px solid #d1d5db",
+  background: "#fff",
+  cursor: "pointer",
+  fontWeight: 600,
+},
+dayTabActive: {
+  background: "#2563eb",
+  color: "#fff",
+  borderColor: "#2563eb",
+},
   checks: {
     display: "flex",
     gap: 16,
