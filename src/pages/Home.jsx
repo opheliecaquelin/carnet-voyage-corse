@@ -95,12 +95,12 @@ export default function Home() {
       !item.is_optional &&
       item.category !== "hotel"
   )
-  const restaurantItems = mainItems.filter(
-    (item) => item.category === "restaurant"
-  )
-  
   const activityItems = mainItems.filter(
     (item) => item.category !== "restaurant"
+  )
+  
+  const restaurantItems = mainItems.filter(
+    (item) => item.category === "restaurant"
   )
   const optionalItems = programItems.filter((item) => item.is_optional)
 
@@ -1173,11 +1173,7 @@ let daysData = []
                                 }}
                               />
                             )
-                                  })}
-                                </>
-                              )}
-                            </>
-                          )}
+                          })}
                         </div>
                       )}
                     </div>
@@ -1231,28 +1227,10 @@ let daysData = []
           {mainItems.length === 0 ? (
             <p>Aucune activité pour le moment</p>
           ) : (
-          <>
-            activityItems.map(item) => {
+            activityItems.map((item) => {
               const itemMedia = media.filter(
                 (mediaItem) => mediaItem.program_item_id === item.id
-              })}
-            {restaurantItems.length > 0 && (
-              <>
-                <h2
-                  style={{
-                    marginTop: "40px",
-                    color: theme.text,
-                  }}
-                >
-                  🍴 Restaurants
-                </h2>
-        
-                {restaurantItems.map((item) => {
-                  const itemMedia = media.filter(
-                    (mediaItem) => mediaItem.program_item_id === item.id
-                  )
-
-      
+              )
 
               return (
                 <div
@@ -1638,6 +1616,107 @@ let daysData = []
           </div>
 
       )}
+        {restaurantItems.length > 0 && (
+  <>
+    <h2
+      style={{
+        color: theme.text,
+        marginTop: "40px",
+      }}
+    >
+      🍴 Restaurants
+    </h2>
+
+    <p
+      style={{
+        color: theme.muted,
+        marginBottom: "20px",
+      }}
+    >
+      {restaurantItems.length} restaurant(s)
+    </p>
+
+    {restaurantItems.map((item) => {
+      const itemMedia = media.filter(
+        (mediaItem) => mediaItem.program_item_id === item.id
+      )
+
+      return (
+        <div
+          key={item.id}
+          style={{
+            background: theme.card,
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+            marginBottom: "20px",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "22px",
+              fontWeight: "700",
+            }}
+          >
+            🍴 {item.title}
+          </div>
+
+          {item.event_time && (
+            <div
+              style={{
+                marginTop: "8px",
+                color: theme.muted,
+              }}
+            >
+              🕒 {item.event_time}
+            </div>
+          )}
+
+          {item.address && (
+            <div
+              style={{
+                marginTop: "8px",
+                color: theme.muted,
+              }}
+            >
+              📍 {item.address}
+            </div>
+          )}
+
+          {item.notes && (
+            <div
+              style={{
+                marginTop: "12px",
+              }}
+            >
+              {item.notes}
+            </div>
+          )}
+
+          {item.maps_url && (
+            <a
+              href={getMapsHref(item.maps_url)}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                marginTop: "12px",
+                display: "inline-flex",
+                padding: "10px 14px",
+                borderRadius: "999px",
+                background: theme.button,
+                color: theme.text,
+                textDecoration: "none",
+              }}
+            >
+              📍 Itinéraire
+            </a>
+          )}
+        </div>
+      )
+    })}
+  </>
+)}
               {!isOnline && (
       <div
         style={{
