@@ -200,11 +200,23 @@ export default function Home() {
     }
   }
   async function loadAnecdotes(dayId) {
-  const { data } = await supabase
+  /* const { data } = await supabase
     .from("anecdotes")
     .select("*")
     .eq("day_id", dayId)
     .order("sort_order")
+
+  setAnecdotes(data || []) */
+  
+  const { data, error } = await supabase
+    .from("anecdotes")
+    .select("*")
+    .eq("day_id", dayId)
+    .order("sort_order")
+
+  console.log("DAY ID =", dayId)
+  console.log("ANECDOTES =", data)
+  console.log("ERROR =", error)
 
   setAnecdotes(data || [])
 }
