@@ -927,7 +927,7 @@ function handleDragLeave(event) {
       </form>
 
       {selectedDayId && (
-        <section style={styles.daysSidebar}>
+        <section style={styles.panel}>
           <h2 style={styles.panelTitle}>Programme déjà saisi</h2>
 
           {programItems.length === 0 ? (
