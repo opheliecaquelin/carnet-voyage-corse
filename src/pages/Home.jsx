@@ -414,7 +414,35 @@ let daysData = []
       default:
         return "📍"
     }
+    
   }
+  function getCategoryColor(category) {
+  switch (category) {
+    case "transport":
+      return "#3b82f6" // bleu
+
+    case "visite":
+      return "#8b5cf6" // violet
+
+    case "restaurant":
+      return "#f59e0b" // orange
+
+    case "hotel":
+      return "#10b981" // vert
+
+    case "photo":
+      return "#ec4899" // rose
+
+    case "bateau":
+      return "#06b6d4" // turquoise
+
+    case "todo":
+      return "#6b7280" // gris
+
+    default:
+      return "#94a3b8"
+  }
+}
 
   function getWeatherLabel(code) {
     const labels = {
@@ -1063,23 +1091,7 @@ let daysData = []
             </p>
           )}
 
-
-
-
-          <div
-  style={{
-    background: "red",
-    color: "white",
-    padding: "10px",
-    marginBottom: "20px",
-  }}
->
-  Nombre anecdotes : {anecdotes.length}
-</div>
-
-
-
-          
+   
           {anecdotes.length > 0 && (
   <div
     style={{
@@ -1172,6 +1184,7 @@ let daysData = []
                 borderRadius: "16px",
                 padding: "20px",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                borderLeft: `6px solid ${getCategoryColor("hotel")}`,
               }}
             >
 
@@ -1363,12 +1376,13 @@ let daysData = []
                 <div
                   key={item.id}
                   style={{
-                    background: theme.card,
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                    marginBottom: "20px",
-                  }}
+                      background: theme.card,
+                      borderRadius: "16px",
+                      overflow: "hidden",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                      marginBottom: "20px",
+                      borderLeft: `6px solid ${getCategoryColor(item.category)}`,
+                    }}
                 >
                   
 
@@ -1624,6 +1638,7 @@ let daysData = []
         borderRadius: "16px",
         overflow: "hidden",
         boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+        borderLeft: `6px solid ${getCategoryColor("restaurant")}`,
       }}
     >
       {restaurantItems.map((item, index) => (
