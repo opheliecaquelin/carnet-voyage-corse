@@ -447,8 +447,8 @@ let daysData = []
   function getWeatherLabel(code) {
     const labels = {
       0: "Ensoleillé",
-      1: "Principalement ensoleillé",
-      2: "Partiellement nuageux",
+      1: "Plutôt ensoleillé",
+      2: "Un peu nuageux",
       3: "Couvert",
       45: "Brouillard",
       48: "Brouillard givrant",
