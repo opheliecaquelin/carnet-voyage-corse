@@ -808,15 +808,15 @@ let daysData = []
         ? days[currentIndex - 1]
         : null
 
-    const nextDay =
-      currentIndex < days.length - 1
-        ? days[currentIndex + 1]
-        : null
+   const nextDay =
+  currentIndex < days.length - 1
+    ? days[currentIndex + 1]
+    : null
+
 const todayDay =
   days.length > 0
     ? getDefaultDay(days)
     : null
-    const todayDay = getDefaultDay(days)
 
     return (
       <>
