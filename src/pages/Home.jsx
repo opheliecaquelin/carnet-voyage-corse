@@ -450,7 +450,7 @@ let daysData = []
     const labels = {
       0: "Ensoleillé",
       1: "Plutôt ensoleillé",
-      2: "Un peu nuageux",
+      2: "Qqs nuages",
       3: "Couvert",
       45: "Brouillard",
       48: "Brouillard givrant",
