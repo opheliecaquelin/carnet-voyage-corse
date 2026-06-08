@@ -706,7 +706,7 @@ function handleDragLeave(event) {
 
       {message && <div style={styles.message}>{message}</div>}
       <div style={styles.adminLayout}>
-      <section style={styles.daysSidebar}>
+      <section style={styles.panel}>
         <div style={styles.panelHeader}>
           <h2 style={styles.panelTitle}>Jours</h2>
           <button type="button" onClick={startNewDay} style={styles.button}>
@@ -1220,7 +1220,7 @@ function handleDragLeave(event) {
           </div>   {/* adminContent */}
 </div>   {/* adminLayout */}
     </div>
-      </div>
+
   )
 }
 
@@ -1279,12 +1279,12 @@ const styles = {
     margin: "6px 0 0",
     color: "#6b7280",
   },
-  adminLayout: {
-    display: "grid",
-    gridTemplateColumns: "320px 1fr",
-    gap: "24px",
-    alignItems: "start",
-  },
+adminLayout: {
+  display: "grid",
+  gridTemplateColumns: "280px minmax(0, 1fr)",
+  gap: "24px",
+  alignItems: "start",
+},
   daysSidebar: {
   background: "#fff",
   borderRadius: "20px",
@@ -1378,13 +1378,7 @@ panel: {
     cursor: "pointer",
     fontWeight: 700,
   },
-  dayTabs: {
-    display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
-    paddingBottom: 4,
-    flexWrap: "wrap",
-  },
+
 dayTab: {
   width: "100%",
   textAlign: "left",
