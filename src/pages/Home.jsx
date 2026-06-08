@@ -200,14 +200,14 @@ export default function Home() {
     }
   }
   async function loadAnecdotes(dayId) {
-  /* const { data } = await supabase
+   const { data } = await supabase
     .from("anecdotes")
     .select("*")
     .eq("day_id", dayId)
     .order("sort_order")
 
-  setAnecdotes(data || []) */
-  
+  setAnecdotes(data || []) 
+  /*
   const { data, error } = await supabase
     .from("anecdotes")
     .select("*")
@@ -218,7 +218,7 @@ export default function Home() {
   console.log("ANECDOTES =", data)
   console.log("ERROR =", error)
 
-  setAnecdotes(data || [])
+  setAnecdotes(data || [])*/
 }
   async function init() {
     
@@ -1062,6 +1062,24 @@ let daysData = []
               {selectedDay.summary}
             </p>
           )}
+
+
+
+
+          <div
+  style={{
+    background: "red",
+    color: "white",
+    padding: "10px",
+    marginBottom: "20px",
+  }}
+>
+  Nombre anecdotes : {anecdotes.length}
+</div>
+
+
+
+          
           {anecdotes.length > 0 && (
   <div
     style={{
