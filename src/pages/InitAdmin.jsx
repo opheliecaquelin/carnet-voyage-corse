@@ -725,7 +725,7 @@ function handleDragLeave(event) {
                 ...(selectedDayId === day.id ? styles.dayTabActive : {}),
               }}
             >
-              J{day.day_number}
+              J{day.day_number} • {day.title || "Sans titre"}
             </button>
           ))}
         </div>
@@ -1354,12 +1354,13 @@ const styles = {
   },
   dayTabs: {
     display: "flex",
-    gap: 8,
+    gap: 10,
     overflowX: "auto",
     paddingBottom: 4,
+    flexWrap: "wrap",
   },
   dayTab: {
-    padding: "10px 14px",
+    padding: "10px 16px",
     borderRadius: 999,
     border: "1px solid #d1d5db",
     background: "white",
