@@ -435,7 +435,53 @@ export default function InitAdmin() {
     : "Élément ajouté au programme."
 )
   }
+async function moveProgramItem(itemId, direction) {
+  const currentIndex = programItems.findIndex(
+    (item) => item.id === itemId
+  )
 
+  if (currentIndex === -1) return
+
+  const targetIndex =
+    direction === "up"
+      ? currentIndex - 1
+      : currentIndex + 1
+
+  if (
+    targetIndex < 0 ||
+    targetIndex >= programItems.length
+  ) {
+    return
+  }
+
+  const currentItem = programItems[currentIndex]
+  const targetItem = programItems[targetIndex]
+
+  const currentOrder = currentItem.sort_order
+  const targetOrder = targetItem.sort_order
+
+  const { error: error1 } = await supabase
+    .from("program_items")
+    .update({ sort_order: targetOrder })
+    .eq("id", currentItem.id)
+
+  if (error1) {
+    console.error(error1)
+    return
+  }
+
+  const { error: error2 } = await supabase
+    .from("program_items")
+    .update({ sort_order: currentOrder })
+    .eq("id", targetItem.id)
+
+  if (error2) {
+    console.error(error2)
+    return
+  }
+
+  await loadProgramItems(selectedDayId)
+}
   async function deleteProgramItem(itemId) {
     const confirmed = window.confirm("Supprimer cet élément du programme ?")
     if (!confirmed) return
@@ -890,27 +936,48 @@ function handleDragLeave(event) {
                   </div>
 
                   <div
-                    style={{
-                      display: "flex",
-                      gap: "8px",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => editProgramItem(item)}
-                      style={styles.button}
-                    >
-                      Modifier
-                    </button>
-                  
-                    <button
-                      type="button"
-                      onClick={() => deleteProgramItem(item.id)}
-                      style={styles.dangerButton}
-                    >
-                      Supprimer
-                    </button>
-                  </div>
+  style={{
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+  }}
+>
+  <button
+    type="button"
+    onClick={() =>
+      moveProgramItem(item.id, "up")
+    }
+    style={styles.button}
+  >
+    ↑
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      moveProgramItem(item.id, "down")
+    }
+    style={styles.button}
+  >
+    ↓
+  </button>
+
+  <button
+    type="button"
+    onClick={() => editProgramItem(item)}
+    style={styles.button}
+  >
+    Modifier
+  </button>
+
+  <button
+    type="button"
+    onClick={() => deleteProgramItem(item.id)}
+    style={styles.dangerButton}
+  >
+    Supprimer
+  </button>
+</div>
                 </div>
               ))}
             </div>
