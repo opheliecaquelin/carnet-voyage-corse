@@ -789,160 +789,84 @@ let daysData = []
         </p>
       )}
 
-      <div className="hide-scrollbar"
-        style={{
-          display: "flex",
-          gap: "8px",
-          overflowX: "auto",
-          marginBottom: "24px",
-          whiteSpace: "nowrap",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-        onWheel={(e) => {
-          e.currentTarget.scrollLeft += e.deltaY
-        }}
-      >
-        {days.map((day) => (
-          <button
-            key={day.id}
-            onClick={() => setSelectedDay(day)}
-            style={{
-              padding: "10px 16px",
-              borderRadius: "999px",
-              cursor: "pointer",
-              fontSize: 15,
-              fontWeight: 700,
-              whiteSpace: "nowrap",
-              border:
-                selectedDay?.id === day.id
-                  ? "1px solid #2563eb"
-                  : `1px solid ${theme.border}`,
-              background:
-                selectedDay?.id === day.id
-                  ? "#2563eb"
-                  : theme.card,
-              color:
-                selectedDay?.id === day.id
-                  ? "#ffffff"
-                  : theme.text,
-              boxShadow:
-                selectedDay?.id === day.id
-                  ? "0 6px 16px rgba(37,99,235,0.35)"
-                  : "none",
-            }}
-          >
-            {label(day)}
-          </button>
-        ))}
+      <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "24px",
+    padding: "0 8px",
+  }}
+>
+  {(() => {
+    const currentIndex = days.findIndex(
+      (d) => d.id === selectedDay?.id
+    )
 
+    const prevDay =
+      currentIndex > 0
+        ? days[currentIndex - 1]
+        : null
 
-      </div>
+    const nextDay =
+      currentIndex < days.length - 1
+        ? days[currentIndex + 1]
+        : null
+
+    const todayDay = getDefaultDay(days)
+
+    return (
+      <>
+        <button
+          disabled={!prevDay}
+          onClick={() => prevDay && setSelectedDay(prevDay)}
+          style={{
+            border: "none",
+            background: "transparent",
+            color: theme.text,
+            cursor: "pointer",
+            fontWeight: "600",
+          }}
+        >
+          {prevDay ? `◀ ${label(prevDay)}` : ""}
+        </button>
+
+        <div
+          style={{
+            fontWeight: "700",
+            textAlign: "center",
+            color: theme.text,
+          }}
+        >
+          {label(selectedDay)}
+          {todayDay?.id === selectedDay.id ? " ⭐" : ""}
+        </div>
+
+        <button
+          disabled={!nextDay}
+          onClick={() => nextDay && setSelectedDay(nextDay)}
+          style={{
+            border: "none",
+            background: "transparent",
+            color: theme.text,
+            cursor: "pointer",
+            fontWeight: "600",
+          }}
+        >
+          {nextDay ? `${label(nextDay)} ▶` : ""}
+        </button>
+      </>
+    )
+  })()}
+</div>
 
 
 
       {selectedDay  && (
         <div>
-          <div
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "20px",
-  }}
->
-  <button
-    onClick={() => {
-      const index = days.findIndex(
-        (d) => d.id === selectedDay.id
-      )
-
-      if (index > 0) {
-        setSelectedDay(days[index - 1])
-      }
-    }}
-    disabled={
-      days.findIndex((d) => d.id === selectedDay.id) === 0
-    }
-    style={{
-      padding: "10px 14px",
-      borderRadius: "999px",
-      border: "none",
-      background: theme.button,
-      color: theme.text,
-    }}
-  >
-    ◀
-  </button>
-
-  <div
-    style={{
-      fontWeight: "700",
-      color: theme.text,
-    }}
-  >
-    {selectedDay.day_number} / {days.length}
-  </div>
-
-  <button
-    onClick={() => {
-      const index = days.findIndex(
-        (d) => d.id === selectedDay.id
-      )
-
-      if (index < days.length - 1) {
-        setSelectedDay(days[index + 1])
-      }
-    }}
-    disabled={
-      days.findIndex((d) => d.id === selectedDay.id) ===
-      days.length - 1
-    }
-    style={{
-      padding: "10px 14px",
-      borderRadius: "999px",
-      border: "none",
-      background: theme.button,
-      color: theme.text,
-    }}
-  >
-    ▶
-  </button>
-</div>
-          <div
-  style={{
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "20px",
-  }}
->
-  <button
-    onClick={() =>
-      setSelectedDay(getDefaultDay(days))
-    }
-    style={{
-      padding: "10px 18px",
-      borderRadius: "999px",
-      border: "none",
-      background: "#2563eb",
-      color: "white",
-      fontWeight: "600",
-      cursor: "pointer",
-    }}
-  >
-    📅 Aujourd'hui
-  </button>
-</div>
-          <h2
-            style={{
-              textAlign: "center",
-              fontSize: "32px",
-              marginBottom: 8,
-              color: theme.text,
-            }}
-          >
-            Jour {selectedDay.day_number}
-          </h2>
+          
+          
+          
 
           <p
             style={{
