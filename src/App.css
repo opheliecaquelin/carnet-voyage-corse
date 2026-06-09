@@ -182,3 +182,14 @@
     border-right-color: var(--border);
   }
 }
+@keyframes fadeInDay {
+  from {
+    opacity: 0.6;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
