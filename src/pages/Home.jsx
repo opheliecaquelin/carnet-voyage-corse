@@ -791,6 +791,35 @@ let daysData = []
       )}
 
 <div
+  onTouchStart={(e) => {
+    setDaySwipeStartX(e.touches[0].clientX)
+  }}
+  onTouchEnd={(e) => {
+    if (daySwipeStartX === null || !selectedDay) return
+
+    const endX = e.changedTouches[0].clientX
+    const delta = daySwipeStartX - endX
+
+    const currentIndex = days.findIndex(
+      (d) => d.id === selectedDay.id
+    )
+
+    if (
+      delta > 40 &&
+      currentIndex < days.length - 1
+    ) {
+      setSelectedDay(days[currentIndex + 1])
+    }
+
+    if (
+      delta < -40 &&
+      currentIndex > 0
+    ) {
+      setSelectedDay(days[currentIndex - 1])
+    }
+
+    setDaySwipeStartX(null)
+  }}
   style={{
     display: "flex",
     justifyContent: "space-between",
@@ -847,51 +876,7 @@ const todayDay =
         </button>
 
         <div
-  onTouchStart={(e) => {
-    setDaySwipeStartX(
-      e.touches[0].clientX
-    )
-  }}
-  onTouchEnd={(e) => {
-    if (
-      daySwipeStartX === null ||
-      !selectedDay
-    )
-      return
 
-    const endX =
-      e.changedTouches[0].clientX
-
-    const delta =
-      daySwipeStartX - endX
-
-    const currentIndex =
-      days.findIndex(
-        (d) => d.id === selectedDay.id
-      )
-
-    // swipe gauche = jour suivant
-    if (
-      delta > 50 &&
-      currentIndex < days.length - 1
-    ) {
-      setSelectedDay(
-        days[currentIndex + 1]
-      )
-    }
-
-    // swipe droite = jour précédent
-    if (
-      delta < -50 &&
-      currentIndex > 0
-    ) {
-      setSelectedDay(
-        days[currentIndex - 1]
-      )
-    }
-
-    setDaySwipeStartX(null)
-  }}
   style={{
     fontWeight: "700",
     textAlign: "center",
@@ -1969,7 +1954,7 @@ const todayDay =
       touchStartX - endX
 
     if (
-      delta > 50 &&
+      delta > 30 &&
       galleryImages.length > 1
     ) {
       setGalleryIndex((prev) =>
@@ -1980,7 +1965,7 @@ const todayDay =
     }
 
     if (
-      delta < -50 &&
+      delta < -30 &&
       galleryImages.length > 1
     ) {
       setGalleryIndex((prev) =>
