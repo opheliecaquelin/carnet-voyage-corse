@@ -74,6 +74,8 @@ export default function Home() {
   const [programItems, setProgramItems] = useState([])
   const [allItems, setAllItems] = useState([])
   const [media, setMedia] = useState([])
+  const [allMedia, setAllMedia] = useState([])
+  const [allAnecdotes, setAllAnecdotes] = useState([])
 
   // Météo du jour sélectionné
   const [weather, setWeather] = useState(null)
@@ -146,13 +148,27 @@ export default function Home() {
   useEffect(() => {
     if (!selectedDay ) return
 
-    loadProgramItems(selectedDay.id)
+    setProgramItems(
+  allItems.filter(
+    (item) => item.day_id === selectedDay.id
+  )
+)
 
     setShowAnecdotes(false)
     
-    loadMedia(selectedDay.id)
+    setMedia(
+  allMedia.filter(
+    (m) => m.day_id === selectedDay.id
+  )
+)
+
+setAnecdotes(
+  allAnecdotes.filter(
+    (a) => a.day_id === selectedDay.id
+  )
+)
     loadWeather(selectedDay.weather_location, selectedDay.day_date)
-    loadAnecdotes(selectedDay.id)
+    
   }, [selectedDay])
   // hors ligne
   useEffect(() => {
@@ -202,6 +218,20 @@ export default function Home() {
       return fallback
     }
   }
+  async function loadAllMedia() {
+  const { data } = await supabase
+    .from("media")
+    .select("*")
+
+  setAllMedia(data || [])
+}
+async function loadAllAnecdotes() {
+  const { data } = await supabase
+    .from("anecdotes")
+    .select("*")
+
+  setAllAnecdotes(data || [])
+}
   async function loadAnecdotes(dayId) {
    const { data } = await supabase
     .from("anecdotes")
@@ -228,6 +258,8 @@ export default function Home() {
 
 
     await loadAllItems()
+    await loadAllMedia()
+await loadAllAnecdotes()
 
     try {
       const { data: tripData } = await supabase.from("trip").select("*")
@@ -916,8 +948,13 @@ const todayDay =
 
 
 
-      {selectedDay  && (
-        <div>
+      {selectedDay && (
+  <div
+    key={selectedDay.id}
+    style={{
+      animation: "fadeInDay 0.25s ease",
+    }}
+  >
           
           
           
