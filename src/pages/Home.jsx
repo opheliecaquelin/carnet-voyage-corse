@@ -64,6 +64,7 @@ export default function Home() {
   const [trip, setTrip] = useState(null)
   const [days, setDays] = useState([])
   const [selectedDay, setSelectedDay] = useState(null)
+  const [daySwipeStartX, setDaySwipeStartX] = useState(null)
 
   //dico
   const [dictionaryOpen, setDictionaryOpen] = useState(false)
@@ -846,6 +847,51 @@ const todayDay =
         </button>
 
         <div
+  onTouchStart={(e) => {
+    setDaySwipeStartX(
+      e.touches[0].clientX
+    )
+  }}
+  onTouchEnd={(e) => {
+    if (
+      daySwipeStartX === null ||
+      !selectedDay
+    )
+      return
+
+    const endX =
+      e.changedTouches[0].clientX
+
+    const delta =
+      daySwipeStartX - endX
+
+    const currentIndex =
+      days.findIndex(
+        (d) => d.id === selectedDay.id
+      )
+
+    // swipe gauche = jour suivant
+    if (
+      delta > 50 &&
+      currentIndex < days.length - 1
+    ) {
+      setSelectedDay(
+        days[currentIndex + 1]
+      )
+    }
+
+    // swipe droite = jour précédent
+    if (
+      delta < -50 &&
+      currentIndex > 0
+    ) {
+      setSelectedDay(
+        days[currentIndex - 1]
+      )
+    }
+
+    setDaySwipeStartX(null)
+  }}
   style={{
     fontWeight: "700",
     textAlign: "center",
