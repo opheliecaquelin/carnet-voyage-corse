@@ -557,7 +557,7 @@ let daysData = []
           transition: "background 0.2s ease, color 0.2s ease",
           maxWidth: "760px",
           margin: "0 auto",
-          paddingBottom: "220px",
+          paddingBottom: "180px",
           maxWidth: "760px",
           width: "100%",
           boxSizing: "border-box",
@@ -2026,7 +2026,13 @@ const todayDay =
         Mode hors ligne
       </div>
     )}
+    <div
+  style={{
+    height: "80px",
+  }}
+/>
     </div>
+    
 
   )
 }
