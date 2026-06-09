@@ -14,3 +14,7 @@ body,
 body {
   font-family: system-ui, sans-serif;
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -557,7 +557,7 @@ let daysData = []
           transition: "background 0.2s ease, color 0.2s ease",
           maxWidth: "760px",
           margin: "0 auto",
-          paddingBottom: "96px",
+          paddingBottom: "220px",
           maxWidth: "760px",
           width: "100%",
           boxSizing: "border-box",
