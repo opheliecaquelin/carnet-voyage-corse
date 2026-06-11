@@ -1579,89 +1579,8 @@ const todayDay =
                       </div>
                     )}
 
-             /*       {item.notes && (
-                      <button
-                        onClick={() => toggleExpanded(item.id)}
-                        style={{
-                          marginTop: "12px",
-                          border: "none",
-                          background: theme.button,
-                          borderRadius: "12px",
-                          padding: "10px 14px",
-                          cursor: "pointer",
-                          fontSize: "14px",
-                          fontWeight: "400",
-                          color: theme.text,
-                        }}
-                      >
-                        {expandedItems[item.id]
-                          ? "▲ Réduire"
-                          : "▼ Plus d'informations"}
-                      </button>
-                    )}
-
-                    {expandedItems[item.id] && (
-                      <div
-                        style={{
-                          marginTop: "12px",
-                          padding: "14px",
-                          borderRadius: "12px",
-                          background: theme.softCard,
-                          lineHeight: "1.6",
-                          color: theme.text,
-                        }}
-                      >
-                        {item.notes && (
-                          <div style={{ marginBottom: itemMedia.length ? "14px" : 0 }}>
-                            {item.notes}
-                          </div>
-                        )}
-
-                        {itemMedia.length > 0 && (
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "8px",
-                              flexWrap: "wrap",
-                              marginTop: "12px",
-                            }}
-                          >
-                            {itemMedia.map((img) => {
-                              const imageUrl = getPublicImageUrl(img.image_path)
-
-                              return (
-                                <img
-                                  key={img.id}
-                                  src={imageUrl}
-                                  alt=""
-                                  onClick={() => {
-                                    setGalleryImages(
-                                      itemMedia.map((m) =>
-                                        getPublicImageUrl(m.image_path)
-                                      )
-                                    )
-
-                                    setGalleryIndex(
-                                      itemMedia.findIndex((m) => m.id === img.id)
-                                    )
-                                  }}
-                                  style={{
-                                    width: "90px",
-                                    height: "90px",
-                                    borderRadius: "12px",
-                                    border: `2px solid ${theme.border}`,
-                                    objectFit: "cover",
-                                    cursor: "pointer",
-                                  }}
-                                />
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-*/
-                    // 1. Modifie la condition du bouton pour inclure la présence de médias
+             
+                 
 {(item.notes || itemMedia.length > 0) && (
   <button
     onClick={() => toggleExpanded(item.id)}
@@ -1681,7 +1600,7 @@ const todayDay =
   </button>
 )}
 
-// 2. À l'intérieur du panneau déplié, corrige la source de l'image (img.title au lieu de img.image_path)
+
 {expandedItems[item.id] && (
   <div
     style={{
