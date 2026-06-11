@@ -1627,32 +1627,36 @@ const todayDay =
           marginTop: "12px",
         }}
       >
-        {itemMedia.map((img) => {
-          // Remplacer img.image_path par img.title s'il s'agit bien de cette colonne dans Supabase
-          const imageUrl = getPublicImageUrl(img.title || img.image_path)
+         {itemMedia.map((img) => {
+                              const imageUrl = getPublicImageUrl(img.image_path)
 
-          return (
-            <img
-              key={img.id}
-              src={imageUrl}
-              alt=""
-              onClick={() => {
-                setGalleryImages(
-                  itemMedia.map((m) => getPublicImageUrl(m.title || m.image_path))
-                )
-                setGalleryIndex(itemMedia.findIndex((m) => m.id === img.id))
-              }}
-              style={{
-                width: "90px",
-                height: "90px",
-                borderRadius: "12px",
-                border: `2px solid ${theme.border}`,
-                objectFit: "cover",
-                cursor: "pointer",
-              }}
-            />
-          )
-        })}
+                              return (
+                                <img
+                                  key={img.id}
+                                  src={imageUrl}
+                                  alt=""
+                                  onClick={() => {
+                                    setGalleryImages(
+                                      itemMedia.map((m) =>
+                                        getPublicImageUrl(m.image_path)
+                                      )
+                                    )
+
+                                    setGalleryIndex(
+                                      itemMedia.findIndex((m) => m.id === img.id)
+                                    )
+                                  }}
+                                  style={{
+                                    width: "90px",
+                                    height: "90px",
+                                    borderRadius: "12px",
+                                    border: `2px solid ${theme.border}`,
+                                    objectFit: "cover",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )
+                            })}
       </div>
     )}
   </div>
